@@ -20,9 +20,9 @@ def iterate_commits(repository_path):
         commit_messages_list.append(commit.msg)
         files_changed_list.append(commit.modifications)
 
-        for modification in commit.modifications:
-            source_code_list.append(str(modification.source_code))
-            lines_added_list.append(modification.added)
-            lines_deleted_list.append(modification.deleted)
-            lines_of_code_list.append(modification.nloc)
+        # for modification in commit.modifications:
+        #     source_code_list.append(str(modification.source_code))
+        #     lines_added_list.append(modification.added)
+        #     lines_deleted_list.append(modification.deleted)
+        #     lines_of_code_list.append(modification.nloc)
 

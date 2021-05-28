@@ -1,13 +1,13 @@
-from traction import download_repos
+from action_traction import download_repos
 from typing import List
 from pathlib import Path
 import typer
 
 app = typer.Typer()
 
-@app.callback()
-def callback():
-    """ Action Traction"""
+# @app.callback()
+# def callback():
+#     """ Action Traction"""
 
 @app.command()
 def download_repositories(repositories: List, directory: Path):

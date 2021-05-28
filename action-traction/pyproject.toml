@@ -11,6 +11,7 @@ action-traction = "action_traction.main:app"
 [tool.poetry.dependencies]
 python = "^3.8"
 typer = "^0.3.2"
+GitPython = "^3.1.17"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

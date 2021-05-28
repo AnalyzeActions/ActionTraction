@@ -28,20 +28,28 @@ def iterate_commits(repository_path):
         commit_messages_list.append(commit.msg)
         files_changed_list.append(commit.modifications)
 
-        for modification in commit.modifications:
+        # print(files_changed_list)
+        for m in commit.modifications:
             count = count + 1
-            if modification.source_code is None:
-                source_code_list.append("")
-            else:
-                source_code_list.append(str(modification.source_code))
+            if count == 1:
+                print(
+                    # m.__dict__
+                    m._new_path
+                )
 
-            lines_added_list.append(modification.added)
-            lines_deleted_list.append(modification.removed)
-            lines_of_code_list.append(modification.nloc)
+    # print(len(author_list))
+    # print(count)
 
-    print(len(author_list))
-    print(count)
-
+def download_https(repository_list: List, save_path: Path):
+    # Clone a remote repository using https
+    for repo in repository_list:
+        repo_name = os.path.splitext(os.path.basename(repo))[0]
+        # print(repo_name)
+        # path = pathlib.Path.home() / save_path / repo_name
+        path = save_path / repo_name
+        git.Repo.clone_from(repo, path)
 
 if __name__ == "__main__":
-    iterate_commits("/home/mkapfhammer/Documents/predictiveWellness")
+    # iterate_commits("/home/mkapfhammer/Documents/predictiveWellness")
+    repos = ["https://github.com/gkapfham/meSMSage"]
+    download_https(repos, "~/Documents")

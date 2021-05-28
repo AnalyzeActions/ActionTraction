@@ -10,4 +10,5 @@ def download_https(repository_list: List, save_path: Path):
         repo_name = os.path.splitext(os.path.basename(repo))[0]
         # print(repo_name)
         path = pathlib.Path.home() / save_path / repo_name
+        # path = save_path / repo_name
         git.Repo.clone_from(repo, path)
