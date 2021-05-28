@@ -10,9 +10,10 @@ app = typer.Typer()
 #     """ Action Traction"""
 
 @app.command()
-def download_repositories(repositories: List, directory: Path):
+def download_repositories(repositories: List[str], directory: Path):
     """ Import GitHub repository credentials"""
     download_repos.download_https(repositories, directory)
+
 
 @app.command()
 def determine_metrics():
