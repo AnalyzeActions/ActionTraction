@@ -39,22 +39,40 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     lines_added_list = []
     lines_deleted_list = []
     source_code_list = []
-    lines_of_code_list = []
+    file_list = []
+    repository_list = []
+    raw_data = {}
+    column_names = ["File", "Repository", "Author", "Committer", "Branches", "Commit Message", "Lines Added", "Lines Removed"]
+    final_dataframe = pd.DataFrame(columns = column_names)
     for file in files_to_analyze:
         for commit in RepositoryMining(repository_path, filepath=file).traverse_commits(): 
+            # print(commit.author.name)
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
             date_list.append(commit.committer_date) #TODO: Format date
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
-            # for modification in commit.modifications:
-            #     source_code_list.append(str(modification.source_code))
-            #     lines_added_list.append(modification.added)
-            #     lines_deleted_list.append(modification.deleted)
-            #     lines_of_code_list.append(modification.nloc)
-    
-    dataframe = pd.DataFrame(np.array(([author_list, committer_list]), columns=['Authors', 'Committers']))
-    return dataframe
+            for modification in commit.modifications:
+                source_code_list.append(str(modification.source_code))
+                lines_added_list.append(modification.added)
+                lines_deleted_list.append(modification.removed)
+            file_list.append(file)
+            repository_list.append(repository_path)
+
+        # print(lines_added_list)
+        raw_data["File"] = file_list
+        raw_data["Repository"] = repository_list
+        raw_data["Author"] = author_list
+        raw_data["Committer"] = committer_list
+        raw_data["Branches"] = branches_list
+        raw_data["Commit Message"] = commit_messages_list
+        raw_data["Lines Added"] = lines_added_list
+        raw_data["Lines Removed"] = lines_deleted_list
+
+        first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
+       
+        # final_dataframe.append(first_dataframe, ignore_index=True)
+    return first_dataframe
 
 
 def iterate_through_directory(root_directory: str):
