@@ -13,18 +13,17 @@ def generate_file_list(repository_path: str):
     for commit in RepositoryMining(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
         for modified_file in commit.modifications:
             if modified_file != None:
-                files_changed_list.append(modified_file._new_path)
+                files_changed_list.append(str(modified_file._new_path))
     
     return files_changed_list
 
 
 def determine_actions_files(modified_files: List[str]):
     files_to_analyze = []
-    for file_list in modified_files:
-        for file in file_list:
-            if ".github" in str(file):
-                if files_to_analyze.count(str(file)) == 0:
-                    files_to_analyze.append(str(file))
+    for file in modified_files:
+        if ".github" in str(file):
+            if files_to_analyze.count(str(file)) == 0:
+                files_to_analyze.append(str(file))
     
     return files_to_analyze
 
@@ -84,10 +83,7 @@ def iterate_through_directory(root_directory: str):
         path = pathlib.Path.home() / root_directory / repository
         all_files_changed = generate_file_list(str(path))
         actions_files = determine_actions_files(all_files_changed)
-        dataframe = iterate_actions_files
+        final_dataframe = iterate_actions_files(str(path), actions_files)
 
-    return dataframe
 # def iterate_through_paths(path_list):
 
-
-#TODO: Type annotate functions

@@ -4,9 +4,9 @@ from typing import List
 import pandas as pd
 import numpy as np
 import os
-import git
 import pathlib
 
+#TODO: Function to combine for list of functions (create pd dataframe)
 
 def generate_file_list(repository_path: str):
     files_changed_list = []
@@ -21,15 +21,11 @@ def generate_file_list(repository_path: str):
 def determine_actions_files(modified_files: List[str]):
     files_to_analyze = []
     for file in modified_files:
-        # print("Outer loop")
-        # print(file_list)
-        # for file in file_list:
-        #     print("Inner loop")
-        #     print(file)
         if ".github" in str(file):
             if files_to_analyze.count(str(file)) == 0:
                 files_to_analyze.append(str(file))
     
+    print(files_to_analyze)
     return files_to_analyze
 
 
@@ -63,7 +59,6 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
                 lines_added_list.append(modification.added)
                 lines_deleted_list.append(modification.removed)
 
-
         # print(lines_added_list)
         raw_data["File"] = file_list
         raw_data["Repository"] = repository_list
@@ -75,8 +70,6 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
         raw_data["Lines Removed"] = lines_deleted_list
 
         first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
-       
-        # final_dataframe.append(first_dataframe, ignore_index=True)
     print(first_dataframe)
 
 
@@ -89,23 +82,10 @@ def iterate_through_directory(root_directory: str):
         path = pathlib.Path.home() / root_directory / repository
         all_files_changed = generate_file_list(str(path))
         actions_files = determine_actions_files(all_files_changed)
-        # print(actions_files)
-        iterate_actions_files(str(path), actions_files) 
+        iterate_actions_files(str(path), actions_files)
 
-        
-
-def download_https(repository_list: List, path_list: List):
-    count = 1
-    # Clone a remote repository using https
-    for x in range(0, len(repository_list)-1):
-        git.Repo.clone_from(repository_list[x], path_list[x])
-        count = count + 1
-    
-    return count
+    # return dataframe
 
 
 if __name__ == "__main__":
-    # iterate_through_directory("/home/mkapfhammer/Documents/test_traction")
-    repo_list = ["https://github.com/AnalyzeActions/testActionTraction"]
-    path_list = ["/home/mkapfhammer/Documents/ActionTraction/action-traction/tests"]
-    download_https(repo_list, path_list)
+    iterate_through_directory("/home/mkapfhammer/Documents/test_traction")
