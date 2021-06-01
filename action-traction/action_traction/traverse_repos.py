@@ -1,5 +1,5 @@
 # from pydriller import RepositoryMining
-from pydriller import Repository
+from pydriller import RepositoryMining
 from typing import List
 import pandas as pd
 import numpy as np
@@ -10,7 +10,7 @@ import pathlib
 
 def generate_file_list(repository_path: str):
     files_changed_list = []
-    for commit in Repository(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
+    for commit in RepositoryMining(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
         for modified_file in commit.modifications:
             if modified_file != None:
                 files_changed_list.append(modified_file._new_path)
@@ -41,17 +41,17 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     source_code_list = []
     lines_of_code_list = []
     for file in files_to_analyze:
-        for commit in Repository(repository_path, filepath=file).traverse_commits(): 
+        for commit in RepositoryMining(repository_path, filepath=file).traverse_commits(): 
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
             date_list.append(commit.committer_date) #TODO: Format date
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
-            for modification in commit.modifications:
-                source_code_list.append(str(modification.source_code))
-                lines_added_list.append(modification.added)
-                lines_deleted_list.append(modification.deleted)
-                lines_of_code_list.append(modification.nloc)
+            # for modification in commit.modifications:
+            #     source_code_list.append(str(modification.source_code))
+            #     lines_added_list.append(modification.added)
+            #     lines_deleted_list.append(modification.deleted)
+            #     lines_of_code_list.append(modification.nloc)
     
     dataframe = pd.DataFrame(np.array(([author_list, committer_list]), columns=['Authors', 'Committers']))
     return dataframe
