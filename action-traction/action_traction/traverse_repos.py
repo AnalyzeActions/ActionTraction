@@ -64,7 +64,7 @@ def iterate_through_directory(root_directory: str):
     
     for repository in repos_to_check[0]:
         path = pathlib.Path.home() / root_directory / repository
-        all_files_changed = generate_file_list(path)
+        all_files_changed = generate_file_list(str(path))
         actions_files = determine_actions_files(all_files_changed)
         dataframe = iterate_actions_files
 
