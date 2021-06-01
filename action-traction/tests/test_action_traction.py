@@ -12,6 +12,7 @@ def test_generate_paths():
     path_list = download_repos.generate_save_path(repository_list, directory)
     assert len(path_list) == 3
 
+#TODO: tmpfs fixture to test download_https
 
 # def test_download_https():
 #     repository_list = ["https://github.com/AnalyzeActions/testActionTraction"]
