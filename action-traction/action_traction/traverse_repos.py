@@ -1,9 +1,14 @@
 # from pydriller import RepositoryMining
 from pydriller import Repository
+from typing import List
 import pandas as pd
+import numpy as np
+import os
+import pathlib
 
+#TODO: Function to combine for list of functions (create pd dataframe)
 
-def generate_file_list(repository_path):
+def generate_file_list(repository_path: str):
     files_changed_list = []
     for commit in Repository(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
         for modified_file in commit.modifications:
@@ -13,7 +18,7 @@ def generate_file_list(repository_path):
     return files_changed_list
 
 
-def determine_actions_files(modified_files):
+def determine_actions_files(modified_files: List[str]):
     files_to_analyze = []
     for file_list in modified_files:
         for file in file_list:
@@ -24,7 +29,7 @@ def determine_actions_files(modified_files):
     return files_to_analyze
 
 
-def iterate_actions_files(repository_path, files_to_analyze):
+def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     author_list = []
     committer_list = []
     date_list = []
@@ -48,4 +53,23 @@ def iterate_actions_files(repository_path, files_to_analyze):
                 lines_deleted_list.append(modification.deleted)
                 lines_of_code_list.append(modification.nloc)
     
-    return author_list
+    dataframe = pd.DataFrame(np.array(([author_list, committer_list]), columns=['Authors', 'Committers']))
+    return dataframe
+
+
+def iterate_through_directory(root_directory: str):
+    repos_to_check = []
+    for subdir, dirs, files in os.walk(root_directory):
+        repos_to_check.append(dirs)
+    
+    for repository in repos_to_check[0]:
+        path = pathlib.Path.home() / root_directory / repository
+        all_files_changed = generate_file_list(path)
+        actions_files = determine_actions_files(all_files_changed)
+        dataframe = iterate_actions_files
+
+    return dataframe
+# def iterate_through_paths(path_list):
+
+
+#TODO: Type annotate functions

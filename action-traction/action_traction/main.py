@@ -17,12 +17,13 @@ def download_repositories(repositories: List[str], directory: Path):
     number_repos = download_repos.download_https(repositories, path_list)
 
 @app.command()
-def basic_analysis(repositories: List[str], directory: Path):
-    repositories_list = download_repos.generate_save_path(repositories, directory)
-    for repository in repositories_list:
-        files_changed_list = traverse_repos.generate_file_list(repository)
-        actions_files = traverse_repos.determine_actions_files(files_changed_list)
-        traverse_repos.iterate_actions_files(repository, actions_files)
+def basic_analysis(directory: str):
+    """ Perform basic analysis of GitHub repositories."""
+    # Analyze everything in a certain directory
+    # If told otherwise, do the paths which are provided
+    dataframe = traverse_repos.iterate_through_directory(directory)
+    typer.echo(dataframe)
+
     
 
 @app.command()
