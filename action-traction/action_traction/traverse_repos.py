@@ -60,6 +60,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             committer_list.append(commit.committer.name)
             # print(commit.committer_date.fromisoformat)
             date_list.append(commit.committer_date) #TODO: Format date
+            print(date_list)
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
             size_bytes_list.append(os.stat(complete_file).st_size)
@@ -75,16 +76,23 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
         raw_data["Committer"] = committer_list
         raw_data["Branches"] = branches_list
         raw_data["Commit Message"] = commit_messages_list
-        raw_data["Lines Added"] = lines_added_list
-        raw_data["Lines Removed"] = lines_deleted_list
-        first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
+        # raw_data["Lines Added"] = lines_added_list
+        # raw_data["Lines Removed"] = lines_deleted_list
+    first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
+    return first_dataframe
+    # print(first_dataframe)
+        # print(first_dataframe)
         # print(raw_data)
-    final_dataframe = final_dataframe.append(first_dataframe)
-    return final_dataframe
+        # final_dataframe = final_dataframe.append(first_dataframe)
+        # first_dataframe = pd.Dataframe()
+    # # print(final_dataframe)
+    # print(final_dataframe)
 
 
 def iterate_through_directory(root_directory: str):
     repos_to_check = []
+    dataframes_list = []
+    final_dataframe = pd.DataFrame()
     for subdir, dirs, files in os.walk(root_directory):
         repos_to_check.append(dirs)
     
@@ -92,8 +100,11 @@ def iterate_through_directory(root_directory: str):
         path = pathlib.Path.home() / root_directory / repository
         all_files_changed = generate_file_list(str(path))
         actions_files = determine_actions_files(all_files_changed)
-        final_dataframe = iterate_actions_files(str(path), actions_files)
+        single_repo_dataframe = iterate_actions_files(str(path), actions_files)
+        dataframes_list.append(single_repo_dataframe)
+    
+    for initial_data in dataframes_list:
+        final_dataframe = final_dataframe.append(initial_data)
+    # print(final_dataframe)
 
-    return final_dataframe
 # def iterate_through_paths(path_list):
-

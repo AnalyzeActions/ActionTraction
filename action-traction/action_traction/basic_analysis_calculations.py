@@ -49,8 +49,42 @@ def calculate_committer_metrics(initial_data):
     print(committer_dictionary)
     
 
-# def calculate_branches_metrics(initial_data):
+def calculate_branches_metrics(initial_data):
+    branches_dictionary = {}
+    branches_list = initial_data["Branches"].tolist()
+    print(branches_list)
 
 def calculate_lines_added_metrics(initial_data):
+    added_dictionary = {}
+    lines_added_list = initial_data["Lines Added"].tolist()
+    minimum = min(lines_added_list)
+    maximum = max(lines_added_list)
+    total_lines_added = 0
+    for index in range(0, len(lines_added_list)):
+        total_lines_added = total_lines_added + lines_added_list[index]
 
-# def calculate_lines_removed_metrics(initial_data):
+    mean = total_lines_added / len(lines_added_list)
+    median = statistics.median(lines_added_list)
+
+    added_dictionary["Minimum"] = minimum
+    added_dictionary["Maximum"] = maximum
+    added_dictionary["Mean"] = mean
+    added_dictionary["Median"] = median
+
+
+def calculate_lines_removed_metrics(initial_data):
+    removed_dictionary = {}
+    lines_removed_list = initial_data["Lines Removed"].tolist()
+    minimum = min(lines_removed_list)
+    maximum = max(lines_removed_list)
+    total_lines_removed = 0
+    for index in range(0, len(lines_removed_list)):
+        total_lines_removed = total_lines_removed[index]
+    
+    mean = total_lines_removed / len(lines_removed_list)
+    median = statistics.median(lines_removed_list)
+
+    removed_dictionary["Minimum"] = minimum
+    removed_dictionary["Maximum"] = maximum
+    removed_dictionary["Mean"] = mean
+    removed_dictionary["Median"] = median

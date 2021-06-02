@@ -60,6 +60,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             committer_list.append(commit.committer.name)
             # print(commit.committer_date.fromisoformat)
             date_list.append(commit.committer_date) #TODO: Format date
+            print(date_list)
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
             size_bytes_list.append(os.stat(complete_file))

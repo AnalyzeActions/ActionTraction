@@ -24,6 +24,9 @@ def basic_analysis(directory: str):
     # If told otherwise, do the paths which are provided
     dataframe = traverse_repos.iterate_through_directory(directory)
     basic.calculate_size_metrics(dataframe)
+    basic.calculate_author_metrics(dataframe)
+    basic.calculate_committer_metrics(dataframe)
+    basic.calculate_branches_metrics(dataframe)
 # @app.command()
 # def perform_summarization(User_selection: List[str]):
     
