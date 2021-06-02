@@ -1,25 +1,28 @@
 from action_traction import __version__
 from action_traction import download_repos
 from action_traction import traverse_repos
-
+import os
 
 def test_version():
     assert __version__ == '0.1.0'
 
 def test_generate_paths():
     repository_list = ["Repo_one", "Repo_two", "Repo_three"]
-    directory = "home/mkapfhammer/Documents"
+    directory = "/home/mkapfhammer/Documents"
     path_list = download_repos.generate_save_path(repository_list, directory)
     assert len(path_list) == 3
 
 #TODO: tmpfs fixture to test download_https
 
-# def test_download_https():
-#     repository_list = ["https://github.com/AnalyzeActions/testActionTraction"]
-#     directory = "home/mkapfhammer/Documents/ActionTraction/action-traction/tests"
-#     path_list = download_repos.generate_save_path(repository_list, directory)
-#     repository_amounts = download_repos.download_https(repository_list, path_list)
-#     assert repository_amounts == 1
+def test_download_https(tmp_path):
+    d = tmp_path / "repos"
+    repos_to_check = []
+    repository_list = ["https://github.com/gkapfham/meSMSage"]
+    directory = str(d)
+    print(directory)
+    path_list = download_repos.generate_save_path(repository_list, directory)
+    repository_amounts = download_repos.download_https(repository_list, path_list)
+    assert repository_amounts == 1
 
 # def test_generate_file_list():
 #     repository_path = "testActionTraction"

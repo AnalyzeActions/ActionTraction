@@ -25,7 +25,6 @@ def determine_actions_files(modified_files: List[str]):
             if files_to_analyze.count(str(file)) == 0:
                 files_to_analyze.append(str(file))
     
-    print(files_to_analyze)
     return files_to_analyze
 
 
@@ -42,8 +41,21 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     file_list = []
     repository_list = []
     raw_data = {}
-    column_names = ["File", "Repository", "Author", "Committer", "Branches", "Commit Message", "Lines Added", "Lines Removed"]
-    final_dataframe = pd.DataFrame(columns = column_names)
+    first_dict = {}
+    # column_names = ["File", "Repository", "Author", "Committer", "Branches", "Commit Message", "Lines Added", "Lines Removed"]
+    # final_dataframe = pd.DataFrame(columns = column_names)
+
+    # first_dict["File"] = [0]
+    # first_dict["Repository"] = [0]
+    # first_dict["Author"] = [0]
+    # first_dict["Committer"] = [0]
+    # first_dict["Branches"] = [0]
+    # first_dict["Commit Message"] = [0]
+    # first_dict["Lines Added"] = [0]
+    # first_dict["Lines Removed"] = [0]
+
+    # final_dataframe = pd.DataFrame.from_dict(first_dict, orient="columns")
+
     for file in files_to_analyze:
         for commit in RepositoryMining(repository_path, filepath=file).traverse_commits(): 
             # print(commit.author.name)
@@ -52,12 +64,12 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             date_list.append(commit.committer_date) #TODO: Format date
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
-            file_list.append(file)
-            repository_list.append(repository_path)
             for modification in commit.modifications:
                 source_code_list.append(str(modification.source_code))
                 lines_added_list.append(modification.added)
                 lines_deleted_list.append(modification.removed)
+            file_list.append(file)
+            repository_list.append(repository_path)
 
         # print(lines_added_list)
         raw_data["File"] = file_list
@@ -70,6 +82,8 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
         raw_data["Lines Removed"] = lines_deleted_list
 
         first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
+        # print(first_dataframe)
+        # final_dataframe.append(first_dataframe)
     print(first_dataframe)
 
 
@@ -82,9 +96,7 @@ def iterate_through_directory(root_directory: str):
         path = pathlib.Path.home() / root_directory / repository
         all_files_changed = generate_file_list(str(path))
         actions_files = determine_actions_files(all_files_changed)
-        iterate_actions_files(str(path), actions_files)
-
-    # return dataframe
+        final_dataframe = iterate_actions_files(str(path), actions_files)
 
 
 if __name__ == "__main__":
