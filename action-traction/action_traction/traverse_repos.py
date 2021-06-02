@@ -46,35 +46,41 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     source_code_list = []
     file_list = []
     repository_list = []
+    size_bytes_list = []
     raw_data = {}
 
     final_dataframe = pd.DataFrame()
     first_dataframe = pd.DataFrame()
     for file in files_to_analyze:
         for commit in Repository(repository_path, filepath=file).traverse_commits(): 
+            complete_file = repository_path + "/" + file
             file_list.append(file)
             repository_list.append(repository_path)
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
+            # print(commit.committer_date.fromisoformat)
             date_list.append(commit.committer_date) #TODO: Format date
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
-            # for modification in commit.modified_files:
-            #     source_code_list.append(str(modification.source_code))
-            #     lines_added_list.append(modification.added)
-            #     lines_deleted_list.append(modification.removed)
-        raw_data["File"] = file_list
+            size_bytes_list.append(os.stat(complete_file).st_size)
+            for modification in commit.modified_files:
+                # print(dir(modification))
+                # source_code_list.append(str(modification.source_code))
+                lines_added_list.append(modification.added_lines)
+                lines_deleted_list.append(modification.deleted_lines)
         raw_data["Repository"] = repository_list
+        raw_data["File"] = file_list
+        raw_data["File Size in Bytes"] = size_bytes_list
         raw_data["Author"] = author_list
         raw_data["Committer"] = committer_list
         raw_data["Branches"] = branches_list
         raw_data["Commit Message"] = commit_messages_list
-        # raw_data["Lines Added"] = lines_added_list
-        # raw_data["Lines Removed"] = lines_deleted_list
+        raw_data["Lines Added"] = lines_added_list
+        raw_data["Lines Removed"] = lines_deleted_list
         first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
         # print(raw_data)
     final_dataframe = final_dataframe.append(first_dataframe)
-    print(final_dataframe)
+    return final_dataframe
 
 
 def iterate_through_directory(root_directory: str):
@@ -88,5 +94,6 @@ def iterate_through_directory(root_directory: str):
         actions_files = determine_actions_files(all_files_changed)
         final_dataframe = iterate_actions_files(str(path), actions_files)
 
+    return final_dataframe
 # def iterate_through_paths(path_list):
 

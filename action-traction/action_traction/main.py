@@ -1,5 +1,6 @@
 from action_traction import download_repos
 from action_traction import traverse_repos
+from action_traction import basic_analysis_calculations as basic
 from typing import List
 from pathlib import Path
 import typer
@@ -22,8 +23,9 @@ def basic_analysis(directory: str):
     # Analyze everything in a certain directory
     # If told otherwise, do the paths which are provided
     dataframe = traverse_repos.iterate_through_directory(directory)
-    typer.echo(dataframe)
-
+    basic.calculate_size_metrics(dataframe)
+# @app.command()
+# def perform_summarization(User_selection: List[str]):
     
 
 @app.command()

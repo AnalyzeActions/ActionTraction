@@ -1,5 +1,5 @@
 # from pydriller import RepositoryMining
-from pydriller import RepositoryMining
+from pydriller import Repository
 from typing import List
 import pandas as pd
 import numpy as np
@@ -10,11 +10,17 @@ import pathlib
 
 def generate_file_list(repository_path: str):
     files_changed_list = []
-    for commit in RepositoryMining(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
-        for modified_file in commit.modifications:
-            if modified_file != None:
-                files_changed_list.append(str(modified_file._new_path))
-    
+    for commit in Repository(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
+        # print(dir(commit))
+        # print(commit.modified_files.name)
+        for changed_file in commit.modified_files:
+            # print(dir(changed_file))
+            files_changed_list.append(changed_file.new_path)
+            # print(changed_file.new_path)
+        # for modified_file in commit.modifications:
+        #     if modified_file != None:
+        #         files_changed_list.append(str(modified_file._new_path))
+    # print(files_changed_list)
     return files_changed_list
 
 
@@ -40,51 +46,41 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     source_code_list = []
     file_list = []
     repository_list = []
+    size_bytes_list = []
     raw_data = {}
-    first_dict = {}
-    # column_names = ["File", "Repository", "Author", "Committer", "Branches", "Commit Message", "Lines Added", "Lines Removed"]
-    # final_dataframe = pd.DataFrame(columns = column_names)
 
-    # first_dict["File"] = [0]
-    # first_dict["Repository"] = [0]
-    # first_dict["Author"] = [0]
-    # first_dict["Committer"] = [0]
-    # first_dict["Branches"] = [0]
-    # first_dict["Commit Message"] = [0]
-    # first_dict["Lines Added"] = [0]
-    # first_dict["Lines Removed"] = [0]
-
-    # final_dataframe = pd.DataFrame.from_dict(first_dict, orient="columns")
-
+    final_dataframe = pd.DataFrame()
+    first_dataframe = pd.DataFrame()
     for file in files_to_analyze:
-        for commit in RepositoryMining(repository_path, filepath=file).traverse_commits(): 
-            # print(commit.author.name)
+        for commit in Repository(repository_path, filepath=file).traverse_commits(): 
+            complete_file = repository_path + "/" + file
+            file_list.append(file)
+            repository_list.append(repository_path)
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
+            # print(commit.committer_date.fromisoformat)
             date_list.append(commit.committer_date) #TODO: Format date
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
-            for modification in commit.modifications:
-                source_code_list.append(str(modification.source_code))
-                lines_added_list.append(modification.added)
-                lines_deleted_list.append(modification.removed)
-            file_list.append(file)
-            repository_list.append(repository_path)
-
-        # print(lines_added_list)
-        raw_data["File"] = file_list
+            size_bytes_list.append(os.stat(complete_file))
+            for modification in commit.modified_files:
+                # print(dir(modification))
+                # source_code_list.append(str(modification.source_code))
+                lines_added_list.append(modification.added_lines)
+                lines_deleted_list.append(modification.deleted_lines)
         raw_data["Repository"] = repository_list
+        raw_data["File"] = file_list
+        raw_data["File Size in Bytes"] = size_bytes_list
         raw_data["Author"] = author_list
         raw_data["Committer"] = committer_list
         raw_data["Branches"] = branches_list
         raw_data["Commit Message"] = commit_messages_list
         raw_data["Lines Added"] = lines_added_list
         raw_data["Lines Removed"] = lines_deleted_list
-
         first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
-        # print(first_dataframe)
-        # final_dataframe.append(first_dataframe)
-    print(first_dataframe)
+        # print(raw_data)
+    final_dataframe = final_dataframe.append(first_dataframe)
+    return final_dataframe
 
 
 def iterate_through_directory(root_directory: str):
@@ -99,5 +95,11 @@ def iterate_through_directory(root_directory: str):
         final_dataframe = iterate_actions_files(str(path), actions_files)
 
 
+def calculate_size_metrics(initial_data):
+    for column_name, item in initial_data.iteritems():
+        if column_name == "File Size in Bytes":
+            print(item)
+
 if __name__ == "__main__":
-    iterate_through_directory("/home/mkapfhammer/Documents/test_traction")
+    initial_data = iterate_through_directory("/home/mkapfhammer/Documents/test_traction")
+    calculate_size_metrics(initial_data)
