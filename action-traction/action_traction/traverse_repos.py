@@ -105,7 +105,7 @@ def iterate_through_directory(root_directory: str):
     
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
-    print(final_dataframe)
+    # print(final_dataframe)
     return final_dataframe
 
 # def iterate_through_paths(path_list):

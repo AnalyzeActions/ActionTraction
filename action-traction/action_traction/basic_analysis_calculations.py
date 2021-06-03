@@ -1,25 +1,58 @@
 import statistics
+import pandas as pd
 
-def calculate_size_metrics(initial_data):
+def determine_repositories(initial_data):
+    repository_list = initial_data["Repository"].tolist()
+    repository_set = set(repository_list)
+    return repository_set
+
+
+def determine_files_per_repo(initial_data, repository_set):
+    repo_file_dict = {}
+    for repository in repository_set:
+        new_data = initial_data.loc[initial_data['Repository'] == repository]
+        # print(new_data)
+        file_list = new_data["File"].tolist()
+        file_set = set(file_list)
+        repo_file_dict[repository] = file_set
+    # print(repo_file_dict)
+    return repo_file_dict
+
+
+def calculate_size_metrics(initial_data, repo_file_dict):
     # print(initial_data["File Size in Bytes"])
-    total_size = 0
+    # total_size = 0
     minimum = 0
     maximum = 0
     size_dictionary = {}
-    size_list = initial_data["File Size in Bytes"].tolist()
-    minimum = min(size_list)
-    maximum = max(size_list)
-    for index in range(0, len(size_list)):
-        total_size = total_size + size_list[index]
-
-    mean = total_size / len(size_list)
-    median = statistics.median(size_list)
-
-    size_dictionary["Minimum"] = minimum
-    size_dictionary["Maximum"] = maximum
-    size_dictionary["Mean"] = mean
-    size_dictionary["Median"] = median
-
+    final_dict = {}
+    dataframe_list = []
+    size_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = initial_data.loc[initial_data['File'] == file]
+            size_list = new_data["File Size in Bytes"].tolist()
+            print(size_list)
+            minimum = min(size_list)
+            maximum = max(size_list)
+            total_size = 0
+            for index in range(0, len(size_list)):
+                total_size = total_size + size_list[index]
+            print(total_size)
+            mean = total_size / len(size_list)
+            median = statistics.median(size_list)
+            
+            size_dictionary["Repository"] = [repo]
+            size_dictionary["File"] = [file]
+            size_dictionary["Minimum"] = [minimum]
+            size_dictionary["Maximum"] = [maximum]
+            size_dictionary["Mean"] = [mean]
+            size_dictionary["Median"] = [median]
+            initial_size_dataframe = pd.DataFrame.from_dict(size_dictionary)
+            dataframe_list.append(initial_size_dataframe)
+    for result in dataframe_list:
+        size_dataframe = size_dataframe.append(result)
+    print(size_dataframe)
     return size_dictionary
 
 
