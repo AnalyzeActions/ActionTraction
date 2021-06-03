@@ -52,34 +52,67 @@ def calculate_size_metrics(initial_data, repo_file_dict):
             dataframe_list.append(initial_size_dataframe)
     for result in dataframe_list:
         size_dataframe = size_dataframe.append(result)
-    print(size_dataframe)
     return size_dictionary
 
 
-def calculate_author_metrics(initial_data):
+def calculate_author_metrics(initial_data, repo_file_dict):
     author_dictionary = {}
-    author_list = initial_data["Author"].tolist()
-    author_set = set(author_list)
     count_unique_authors = 0
-    for unique_author in author_set:
-        count_unique_authors = author_list.count(unique_author)
-        author_dictionary[unique_author] = count_unique_authors
-        author_percentage_contribution = (count_unique_authors / len(author_list)) * 100
-        author_dictionary[unique_author + " Percentage Contribution"] = author_percentage_contribution
-    return author_dictionary
+    dataframe_list = []
+    author_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = initial_data.loc[initial_data['File'] == file]
+            author_list = new_data["Author"].tolist()
+            author_set = set(author_list)
+            list_percentage_contributions = []
+            for unique_author in author_set:
+                unique_author_contribution = author_list.count(unique_author)
+                author_percentage_contribution = (unique_author_contribution) / len(author_list) * 100
+                list_percentage_contributions.append(author_percentage_contribution)
+                
+                author_dictionary["Repository"] = [repo]
+                author_dictionary["File"] = [file]
+                author_dictionary["Author"] = [unique_author]
+                author_dictionary["Number Corresponding Commits"] = unique_author_contribution
+                author_dictionary["Percentage Contribution"] = [author_percentage_contribution]
+                initial_dataframe = pd.DataFrame.from_dict(author_dictionary, orient="columns")
+                dataframe_list.append(initial_dataframe)
+    
+    for result in dataframe_list:
+        author_dataframe = author_dataframe.append(result)
+
+    return author_dataframe
 
 
-def calculate_committer_metrics(initial_data):
+def calculate_committer_metrics(initial_data, repo_file_dict):
     committer_dictionary = {}
-    committer_list = initial_data["Author"].tolist()
-    committer_set = set(committer_list)
-    count_unique_authors = 0
-    for unique_committer in committer_set:
-        count_unique_committers = committer_list.count(unique_committer)
-        committer_dictionary[unique_committer] = count_unique_committers
-        committer_percentage_contribution = (count_unique_committers / len(committer_list)) * 100
-        committer_dictionary[unique_committer + " Percentage Contribution"] = committer_percentage_contribution
-    # print(committer_dictionary)
+    count_unique_committer = 0
+    dataframe_list = []
+    committer_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = initial_data.loc[initial_data['File'] == file]
+            committer_list = new_data["Committer"].tolist()
+            committer_set = set(committer_list)
+            list_percentage_contributions = []
+            for unique_committer in committer_set:
+                unique_committer_contribution = committer_list.count(unique_committer)
+                committer_percentage_contribution = (unique_committer_contribution) / len(committer_list) * 100
+                list_percentage_contributions.append(committer_percentage_contribution)
+                
+                author_dictionary["Repository"] = [repo]
+                author_dictionary["File"] = [file]
+                author_dictionary["Author"] = [unique_committer]
+                author_dictionary["Number Corresponding Commits"] = unique_committer_contribution
+                author_dictionary["Percentage Contribution"] = [committer_percentage_contribution]
+                initial_dataframe = pd.DataFrame.from_dict(committer_dictionary, orient="columns")
+                dataframe_list.append(initial_dataframe)
+    
+    for result in dataframe_list:
+        committer_dataframe = committer_dataframe.append(result)
+
+    return committer_dataframe
     
 
 # def calculate_branches_metrics(initial_data):

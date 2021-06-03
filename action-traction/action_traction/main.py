@@ -26,7 +26,7 @@ def basic_analysis(directory: str):
     dataframe = traverse_repos.iterate_through_directory(directory)
     repo_set = basic.determine_repositories(dataframe)
     repo_file_dictionary = basic.determine_files_per_repo(dataframe, repo_set)
-    basic.calculate_size_metrics(dataframe, repo_file_dictionary)
+    basic.calculate_author_metrics(dataframe, repo_file_dictionary)
     # basic.perform_specified_summarization(analysis_selections, dataframe)
 # @app.command()
 # def perform_summarization(User_selection: List[str]):
