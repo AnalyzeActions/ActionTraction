@@ -28,8 +28,3 @@ def basic_analysis(directory: str, analysis_selections: List[str]):
 # def perform_summarization(User_selection: List[str]):
     
 
-@app.command()
-def determine_metrics():
-    """Determine user specified metrics to run"""
-    typer.echo("Determining metrics to run")
-
