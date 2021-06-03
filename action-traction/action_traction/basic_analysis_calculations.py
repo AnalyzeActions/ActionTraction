@@ -46,13 +46,13 @@ def calculate_committer_metrics(initial_data):
         committer_dictionary[unique_committer] = count_unique_committers
         committer_percentage_contribution = (count_unique_committers / len(committer_list)) * 100
         committer_dictionary[unique_committer + " Percentage Contribution"] = committer_percentage_contribution
-    print(committer_dictionary)
+    # print(committer_dictionary)
     
 
 def calculate_branches_metrics(initial_data):
     branches_dictionary = {}
     branches_list = initial_data["Branches"].tolist()
-    print(branches_list)
+    # print(branches_list)
 
 def calculate_lines_added_metrics(initial_data):
     added_dictionary = {}
@@ -71,6 +71,7 @@ def calculate_lines_added_metrics(initial_data):
     added_dictionary["Mean"] = mean
     added_dictionary["Median"] = median
 
+    return added_dictionary
 
 def calculate_lines_removed_metrics(initial_data):
     removed_dictionary = {}
@@ -79,7 +80,7 @@ def calculate_lines_removed_metrics(initial_data):
     maximum = max(lines_removed_list)
     total_lines_removed = 0
     for index in range(0, len(lines_removed_list)):
-        total_lines_removed = total_lines_removed[index]
+        total_lines_removed = total_lines_removed + lines_removed_list[index]
     
     mean = total_lines_removed / len(lines_removed_list)
     median = statistics.median(lines_removed_list)
@@ -88,3 +89,5 @@ def calculate_lines_removed_metrics(initial_data):
     removed_dictionary["Maximum"] = maximum
     removed_dictionary["Mean"] = mean
     removed_dictionary["Median"] = median
+
+    return removed_dictionary

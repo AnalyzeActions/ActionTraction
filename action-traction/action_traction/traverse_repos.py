@@ -60,7 +60,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             committer_list.append(commit.committer.name)
             # print(commit.committer_date.fromisoformat)
             date_list.append(commit.committer_date) #TODO: Format date
-            print(date_list)
+            # print(date_list)
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
             size_bytes_list.append(os.stat(complete_file).st_size)
@@ -105,6 +105,6 @@ def iterate_through_directory(root_directory: str):
     
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
-    # print(final_dataframe)
+    return final_dataframe
 
 # def iterate_through_paths(path_list):
