@@ -18,15 +18,12 @@ def download_repositories(repositories: List[str], directory: Path):
     number_repos = download_repos.download_https(repositories, path_list)
 
 @app.command()
-def basic_analysis(directory: str):
-    """ Perform basic analysis of GitHub repositories."""
+def basic_analysis(directory: str, analysis_selections: List[str]):
+    """ Perform basic analysis of GitHub repositories (options: Modifiers, Size, Diff)"""
     # Analyze everything in a certain directory
     # If told otherwise, do the paths which are provided
     dataframe = traverse_repos.iterate_through_directory(directory)
-    basic.calculate_size_metrics(dataframe)
-    basic.calculate_author_metrics(dataframe)
-    basic.calculate_committer_metrics(dataframe)
-    basic.calculate_branches_metrics(dataframe)
+    basic.perform_specified_summarization(analysis_selections, dataframe)
 # @app.command()
 # def perform_summarization(User_selection: List[str]):
     

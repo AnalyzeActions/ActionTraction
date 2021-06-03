@@ -76,7 +76,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
         raw_data["Committer"] = committer_list
         raw_data["Branches"] = branches_list
         raw_data["Commit Message"] = commit_messages_list
-        # raw_data["Lines Added"] = lines_added_list
+        # raw_data["Lines Added"] = lines_added_list #TODO: ValueError: Arrays must all be the same length
         # raw_data["Lines Removed"] = lines_deleted_list
     first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
     return first_dataframe
@@ -105,6 +105,7 @@ def iterate_through_directory(root_directory: str):
     
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
+    print(final_dataframe)
     return final_dataframe
 
 # def iterate_through_paths(path_list):

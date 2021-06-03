@@ -49,10 +49,11 @@ def calculate_committer_metrics(initial_data):
     # print(committer_dictionary)
     
 
-def calculate_branches_metrics(initial_data):
-    branches_dictionary = {}
-    branches_list = initial_data["Branches"].tolist()
-    # print(branches_list)
+# def calculate_branches_metrics(initial_data):
+#     branches_dictionary = {}
+#     branches_list = initial_data["Branches"].tolist()
+#     for branch in branches_list:
+#         print(type(branch))
 
 def calculate_lines_added_metrics(initial_data):
     added_dictionary = {}
@@ -91,3 +92,20 @@ def calculate_lines_removed_metrics(initial_data):
     removed_dictionary["Median"] = median
 
     return removed_dictionary
+
+def perform_specified_summarization(specified_metrics, initial_data):
+    if "Modifiers" in specified_metrics:
+        author_results = calculate_author_metrics(initial_data)
+        committer_results = calculate_committer_metrics(initial_data)
+        print(author_results)
+        print(committer_results)
+    if "Size" in specified_metrics:
+        size_results = calculate_size_metrics(initial_data)
+        print(size_results)
+    # if "Lifetime" in specified_metrics:
+    #     lifetime_results = calculate_lifetime_metrics(initial_data)
+    # if "Diff" in specified_metrics:
+    #     added_results = calculate_lines_added_metrics(initial_data)
+    #     removed_results = calculate_lines_removed_metrics(initial_data)
+    #     print(added_results)
+    #     print(removed_results)
