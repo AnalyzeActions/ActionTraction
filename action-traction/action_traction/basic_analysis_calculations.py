@@ -1,5 +1,7 @@
+from pydriller import Repository
 import statistics
 import pandas as pd
+
 
 def determine_repositories(initial_data):
     repository_list = initial_data["Repository"].tolist()
@@ -19,6 +21,49 @@ def determine_files_per_repo(initial_data, repository_set):
     return repo_file_dict
 
 
+def determine_entire_repo_lifetime(repository_path:str):
+    all_commit_dates = []
+    for commit in Repository(repository_path).traverse_commits():
+        all_commit_dates.append(commit.committer_date)
+    
+    beginning_date = all_commit_dates[0]
+    most_recent_date = all_commit_dates[len(all_commit_dates) - 1]
+
+    repository_lifetime = most_recent_date - beginning_date
+
+    return repository_lifetime
+
+
+
+def calculate_file_lifetime(initial_data, repo_file_dict):
+    lifetime_dictionary = {}
+    dataframe_list = []
+    lifetime_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        repository_lifetime = determine_entire_repo_lifetime(repo)
+        for file in file_list:
+            new_data = initial_data.loc[initial_data['File'] == file]
+            date_list = new_data["Date of Change"].tolist()
+            file_start = date_list[0]
+            file_end = date_list[len(date_list) - 1]
+            file_lifetime = file_end - file_start
+            percentage_of_lifetime = (file_lifetime / repository_lifetime) * 100
+
+            lifetime_dictionary["Repository"] = [repo]
+            lifetime_dictionary["File"] = [file]
+            lifetime_dictionary["Repository Lifetime"] = [repository_lifetime]
+            lifetime_dictionary["File Lifetime"] = [file_lifetime]
+            lifetime_dictionary["Percentage of File Existence"] = percentage_of_lifetime
+
+            initial_lifetime_dataframe = pd.DataFrame.from_dict(lifetime_dictionary)
+            dataframe_list.append(initial_lifetime_dataframe)
+        
+    for result in dataframe_list:
+        lifetime_dataframe = lifetime_dataframe.append(result)
+
+    return lifetime_dataframe
+
+
 def calculate_size_metrics(initial_data, repo_file_dict):
     minimum = 0
     maximum = 0
@@ -30,7 +75,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
         for file in file_list:
             new_data = initial_data.loc[initial_data['File'] == file]
             size_list = new_data["File Size in Bytes"].tolist()
-            
+
             minimum = min(size_list)
             maximum = max(size_list)
             mean = statistics.mean(size_list)
@@ -188,18 +233,21 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
 
 
 def perform_specified_summarization(specified_metrics, initial_data):
+    repository_set = determine_repositories(initial_data)
+    repo_file_dict = determine_files_per_repo(initial_data, repository_set)
+
     if "Modifiers" in specified_metrics:
-        author_results = calculate_author_metrics(initial_data)
-        committer_results = calculate_committer_metrics(initial_data)
+        author_results = calculate_author_metrics(initial_data, repo_file_dict)
+        committer_results = calculate_committer_metrics(initial_data, repo_file_dict)
         print(author_results)
         print(committer_results)
     if "Size" in specified_metrics:
-        size_results = calculate_size_metrics(initial_data)
+        size_results = calculate_size_metrics(initial_data, repo_file_dict)
         print(size_results)
-    # if "Lifetime" in specified_metrics:
-    #     lifetime_results = calculate_lifetime_metrics(initial_data)
-    # if "Diff" in specified_metrics:
-    #     added_results = calculate_lines_added_metrics(initial_data)
-    #     removed_results = calculate_lines_removed_metrics(initial_data)
-    #     print(added_results)
-    #     print(removed_results)
+    if "Lifetime" in specified_metrics:
+        lifetime_results = calculate_file_lifetime(initial_data, repo_file_dict)
+    if "Diff" in specified_metrics:
+        added_results = calculate_lines_added_metrics(initial_data, repo_file_dict)
+        removed_results = calculate_lines_removed_metrics(initial_data, repo_file_dict)
+        print(added_results)
+        print(removed_results)

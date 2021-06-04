@@ -6,21 +6,13 @@ import numpy as np
 import os
 import pathlib
 
-#TODO: Function to combine for list of functions (create pd dataframe)
 
 def generate_file_list(repository_path: str):
     files_changed_list = []
     for commit in Repository(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
-        # print(dir(commit))
-        # print(commit.modified_files.name)
         for changed_file in commit.modified_files:
-            # print(dir(changed_file))
             files_changed_list.append(changed_file.new_path)
-            # print(changed_file.new_path)
-        # for modified_file in commit.modifications:
-        #     if modified_file != None:
-        #         files_changed_list.append(str(modified_file._new_path))
-    # print(files_changed_list)
+
     return files_changed_list
 
 
@@ -66,14 +58,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             size_bytes_list.append(os.stat(complete_file).st_size)
             lines_added_list.append(commit.insertions)
             lines_deleted_list.append(commit.deletions)
-            # for modification in commit.modified_files:
-            #     print(modification.filename)
-            #     # print(dir(modification))
-            #     # source_code_list.append(str(modification.source_code))
-            #     lines_added_list.append(modification.added_lines)
-            #     lines_deleted_list.append(modification.deleted_lines)
-            #     # print("INNER LOOP")
-            #     # print(lines_added_list)
+
         raw_data["Repository"] = repository_list
         raw_data["File"] = file_list
         raw_data["File Size in Bytes"] = size_bytes_list
@@ -81,17 +66,12 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
         raw_data["Committer"] = committer_list
         raw_data["Branches"] = branches_list
         raw_data["Commit Message"] = commit_messages_list
-        raw_data["Lines Added"] = lines_added_list #TODO: ValueError: Arrays must all be the same length
+        raw_data["Lines Added"] = lines_added_list
         raw_data["Lines Removed"] = lines_deleted_list
+        raw_data["Date of Change"] = date_list
     first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
+    
     return first_dataframe
-    # print(first_dataframe)
-        # print(first_dataframe)
-        # print(raw_data)
-        # final_dataframe = final_dataframe.append(first_dataframe)
-        # first_dataframe = pd.Dataframe()
-    # # print(final_dataframe)
-    # print(final_dataframe)
 
 
 def iterate_through_directory(root_directory: str):
@@ -110,7 +90,6 @@ def iterate_through_directory(root_directory: str):
     
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
-    # print(final_dataframe)
     return final_dataframe
 
 # def iterate_through_paths(path_list):
