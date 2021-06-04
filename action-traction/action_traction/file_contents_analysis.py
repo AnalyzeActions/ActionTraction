@@ -49,22 +49,16 @@ def iterate_through_directory(root_directory: str):
 def generate_abstract_syntax_trees(source_code_dataframe):
     yaml_list = []
     source_code_list = source_code_dataframe["Source Code"].tolist()
-    # print(len(source_code_list))
     for source_code in source_code_list:
         if source_code is not None:
             try:
                 parsed_yaml = yaml.safe_load(source_code)
-                # source_code_dataframe["Parse Status"] = [parsed_yaml]
                 yaml_list.append(parsed_yaml)
-                # print("Worked")
             except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
-                # source_code_dataframe["Parse Status"] = ["Cannot parse"]
                 yaml_list.append("Cannot Parse")
-                # print("Incorrect indentation, cannot parse")
         else:
             yaml_list.append("No file contents")
-            # source_code_dataframe["Parse Status"] = ["No file contents"]
     source_code_dataframe["Parse Status"] = yaml_list
-    # print(source_code_dataframe)
     yaml_dataframe = source_code_dataframe
-    print(yaml_dataframe)
+    
+    return yaml_dataframe
