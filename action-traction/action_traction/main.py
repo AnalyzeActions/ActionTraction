@@ -1,6 +1,7 @@
 from action_traction import download_repos
 from action_traction import traverse_repos
 from action_traction import basic_analysis_calculations as basic
+from action_traction import file_contents_analysis as actions_analysis
 from typing import List
 from pathlib import Path
 import typer
@@ -29,5 +30,7 @@ def basic_analysis(directory: str, analysis_selections: List[str]):
     basic.perform_specified_summarization(analysis_selections, directory)
 # @app.command()
 # def perform_summarization(User_selection: List[str]):
-    
 
+@app.command()
+def action_file_analysis(directory: str):
+    actions_analysis.iterate_through_directory(directory)
