@@ -20,8 +20,6 @@ def determine_files_per_repo(initial_data, repository_set):
 
 
 def calculate_size_metrics(initial_data, repo_file_dict):
-    # print(initial_data["File Size in Bytes"])
-    # total_size = 0
     minimum = 0
     maximum = 0
     size_dictionary = {}
@@ -32,15 +30,13 @@ def calculate_size_metrics(initial_data, repo_file_dict):
         for file in file_list:
             new_data = initial_data.loc[initial_data['File'] == file]
             size_list = new_data["File Size in Bytes"].tolist()
-            print(size_list)
+            
             minimum = min(size_list)
             maximum = max(size_list)
-            total_size = 0
-            for index in range(0, len(size_list)):
-                total_size = total_size + size_list[index]
-            print(total_size)
-            mean = total_size / len(size_list)
+            mean = statistics.mean(size_list)
             median = statistics.median(size_list)
+            st_dev = statistics.stdev(size_list)
+            variance = statistics.variance(size_list)
             
             size_dictionary["Repository"] = [repo]
             size_dictionary["File"] = [file]
@@ -48,11 +44,14 @@ def calculate_size_metrics(initial_data, repo_file_dict):
             size_dictionary["Maximum"] = [maximum]
             size_dictionary["Mean"] = [mean]
             size_dictionary["Median"] = [median]
+            size_dictionary["Standard Deviation"] = [st_dev]
+            size_dictionary["Variance"] = [variance]
+
             initial_size_dataframe = pd.DataFrame.from_dict(size_dictionary)
             dataframe_list.append(initial_size_dataframe)
     for result in dataframe_list:
         size_dataframe = size_dataframe.append(result)
-    return size_dictionary
+    return size_dataframe
 
 
 def calculate_author_metrics(initial_data, repo_file_dict):
@@ -76,6 +75,7 @@ def calculate_author_metrics(initial_data, repo_file_dict):
                 author_dictionary["Author"] = [unique_author]
                 author_dictionary["Number Corresponding Commits"] = unique_author_contribution
                 author_dictionary["Percentage Contribution"] = [author_percentage_contribution]
+
                 initial_dataframe = pd.DataFrame.from_dict(author_dictionary, orient="columns")
                 dataframe_list.append(initial_dataframe)
     
@@ -121,43 +121,71 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
 #     for branch in branches_list:
 #         print(type(branch))
 
-def calculate_lines_added_metrics(initial_data):
+def calculate_lines_added_metrics(initial_data, repo_file_dict):
     added_dictionary = {}
-    lines_added_list = initial_data["Lines Added"].tolist()
-    minimum = min(lines_added_list)
-    maximum = max(lines_added_list)
-    total_lines_added = 0
-    for index in range(0, len(lines_added_list)):
-        total_lines_added = total_lines_added + lines_added_list[index]
+    dataframe_list = []
+    added_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = initial_data.loc[initial_data['File'] == file]
+            lines_added_list = new_data["Lines Added"].tolist()
 
-    mean = total_lines_added / len(lines_added_list)
-    median = statistics.median(lines_added_list)
+            mean = statistics.mean(lines_added_list)
+            median = statistics.median(lines_added_list)
+            minimum = min(lines_added_list)
+            maximum = max(lines_added_list)
+            st_dev = statistics.stdev(lines_added_list)
+            variance = statistics.variance(lines_added_list)
 
-    added_dictionary["Minimum"] = minimum
-    added_dictionary["Maximum"] = maximum
-    added_dictionary["Mean"] = mean
-    added_dictionary["Median"] = median
+            added_dictionary["Repository"] = [repo]
+            added_dictionary["File"] = [file]
+            added_dictionary["Minimum"] = [minimum]
+            added_dictionary["Maximum"] = [maximum]
+            added_dictionary["Mean"] = [mean]
+            added_dictionary["Median"] = [median]
+            added_dictionary["Standard Deviation"] = [st_dev]
+            added_dictionary["Variance"] = [variance]
 
-    return added_dictionary
+            initial_size_dataframe = pd.DataFrame.from_dict(added_dictionary)
+            dataframe_list.append(initial_size_dataframe)
 
-def calculate_lines_removed_metrics(initial_data):
+    for result in dataframe_list:
+        added_dataframe = added_dataframe.append(result)
+    return added_dataframe
+
+def calculate_lines_removed_metrics(initial_data, repo_file_dict):
     removed_dictionary = {}
-    lines_removed_list = initial_data["Lines Removed"].tolist()
-    minimum = min(lines_removed_list)
-    maximum = max(lines_removed_list)
-    total_lines_removed = 0
-    for index in range(0, len(lines_removed_list)):
-        total_lines_removed = total_lines_removed + lines_removed_list[index]
-    
-    mean = total_lines_removed / len(lines_removed_list)
-    median = statistics.median(lines_removed_list)
+    dataframe_list = []
+    removed_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = initial_data.loc[initial_data['File'] == file]
+            lines_removed_list = new_data["Lines Removed"].tolist()
 
-    removed_dictionary["Minimum"] = minimum
-    removed_dictionary["Maximum"] = maximum
-    removed_dictionary["Mean"] = mean
-    removed_dictionary["Median"] = median
+            mean = statistics.mean(lines_removed_list)
+            median = statistics.median(lines_removed_list)
+            minimum = min(lines_removed_list)
+            maximum = max(lines_removed_list)
+            st_dev = statistics.stdev(lines_removed_list)
+            variance = statistics.variance(lines_removed_list)
 
-    return removed_dictionary
+            removed_dictionary["Repository"] = [repo]
+            removed_dictionary["File"] = [file]
+            removed_dictionary["Minimum"] = [minimum]
+            removed_dictionary["Maximum"] = [maximum]
+            removed_dictionary["Mean"] = [mean]
+            removed_dictionary["Median"] = [median]
+            removed_dictionary["Standard Deviation"] = [st_dev]
+            removed_dictionary["Variance"] = [variance]
+
+            initial_size_dataframe = pd.DataFrame.from_dict(removed_dictionary)
+            dataframe_list.append(initial_size_dataframe)
+
+    for result in dataframe_list:
+        removed_dataframe = removed_dataframe.append(result)
+
+    return removed_dataframe
+
 
 def perform_specified_summarization(specified_metrics, initial_data):
     if "Modifiers" in specified_metrics:
