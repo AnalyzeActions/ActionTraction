@@ -28,8 +28,7 @@ def generate_repository_metrics(directory: str):
 def basic_analysis(directory: str, analysis_selections: List[str]):
     """ Perform basic analysis of GitHub repositories (options: Modifiers, Size, Diff)"""
     basic.perform_specified_summarization(analysis_selections, directory)
-# @app.command()
-# def perform_summarization(User_selection: List[str]):
+
 
 @app.command()
 def action_file_analysis(directory: str):

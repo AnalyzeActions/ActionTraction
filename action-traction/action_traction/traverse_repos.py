@@ -12,7 +12,7 @@ def generate_file_list(repository_path: str):
     for commit in Repository(repository_path, only_modifications_with_file_types=['.yml']).traverse_commits():
         for changed_file in commit.modified_files:
             files_changed_list.append(changed_file.new_path)
-
+    
     return files_changed_list
 
 
@@ -56,8 +56,6 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             size_bytes_list.append(os.stat(complete_file).st_size)
             lines_added_list.append(commit.insertions)
             lines_deleted_list.append(commit.deletions)
-            for modification in commit.modified_files:
-                source_code_list.append(modification.source_code)
         raw_data["Repository"] = repository_list
         raw_data["File"] = file_list
         raw_data["File Size in Bytes"] = size_bytes_list

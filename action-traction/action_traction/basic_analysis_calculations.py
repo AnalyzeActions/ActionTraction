@@ -1,4 +1,5 @@
 from pydriller import Repository
+from typing import List
 import statistics
 import pandas as pd
 import datetime
@@ -88,6 +89,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
             
             size_dictionary["Repository"] = [repo]
             size_dictionary["File"] = [file]
+            size_dictionary["File Size"] = size_list
             size_dictionary["Minimum"] = [minimum]
             size_dictionary["Maximum"] = [maximum]
             size_dictionary["Mean"] = [mean]
@@ -151,7 +153,7 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
                 
                 committer_dictionary["Repository"] = [repo]
                 committer_dictionary["File"] = [file]
-                committer_dictionary["Author"] = [unique_committer]
+                committer_dictionary["Committer"] = [unique_committer]
                 committer_dictionary["Number Corresponding Commits"] = unique_committer_contribution
                 committer_dictionary["Percentage Contribution"] = [committer_percentage_contribution]
                 initial_dataframe = pd.DataFrame.from_dict(committer_dictionary, orient="columns")
@@ -235,7 +237,44 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
     return removed_dataframe
 
 
-def perform_specified_summarization(specified_metrics, directory):
+def calculate_commit_message_metrics(initial_data, repo_file_dict):
+    commit_message_dictionary = {}
+    dataframe_list = []
+    commit_message_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = initial_data.loc[initial_data['File'] == file]
+            commit_message_list = new_data["Commit Message"].tolist()
+            size_message_list = []
+            for message in commit_message_list:
+                size_message_list.append(len(message))
+
+            mean = statistics.mean(size_message_list)
+            median = statistics.median(size_message_list)
+            minimum = min(size_message_list)
+            maximum = max(size_message_list)
+            st_dev = statistics.stdev(size_message_list)
+            variance = statistics.variance(size_message_list)
+
+            commit_message_dictionary["Repository"] = [repo]
+            commit_message_dictionary["File"] = [file]
+            commit_message_dictionary["Commit Message Size"] = [size_message_list]
+            commit_message_dictionary["Minimum"] = [minimum]
+            commit_message_dictionary["Maximum"] = [maximum]
+            commit_message_dictionary["Mean"] = [mean]
+            commit_message_dictionary["Median"] = [median]
+            commit_message_dictionary["Standard Deviation"] = [st_dev]
+            commit_message_dictionary["Variance"] = [variance]
+
+            initial_size_dataframe = pd.DataFrame.from_dict(commit_message_dictionary)
+            dataframe_list.append(initial_size_dataframe)
+
+    for result in dataframe_list:
+        commit_message_dataframe = commit_message_dataframe.append(result)
+
+    return commit_message_dataframe
+            
+def perform_specified_summarization(specified_metrics: List[str], directory: str):
     csv_path = directory + "/minedRepos.csv"
     initial_data = pd.read_csv(csv_path)
     repository_set = determine_repositories(initial_data)
@@ -257,3 +296,6 @@ def perform_specified_summarization(specified_metrics, directory):
         removed_results = calculate_lines_removed_metrics(initial_data, repo_file_dict)
         print(added_results)
         print(removed_results)
+    if "Messages" in specified_metrics:
+        messages_results = calculate_commit_message_metrics(initial_data, repo_file_dict)
+        print(messages_results)
