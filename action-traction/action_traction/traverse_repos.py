@@ -50,15 +50,14 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             repository_list.append(repository_path)
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
-            # print(commit.committer_date.fromisoformat)
-            date_list.append(commit.committer_date) #TODO: Format date
-            # print(date_list)
+            date_list.append(commit.committer_date)
             branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
             size_bytes_list.append(os.stat(complete_file).st_size)
             lines_added_list.append(commit.insertions)
             lines_deleted_list.append(commit.deletions)
-
+            for modification in commit.modified_files:
+                source_code_list.append(modification.source_code)
         raw_data["Repository"] = repository_list
         raw_data["File"] = file_list
         raw_data["File Size in Bytes"] = size_bytes_list
@@ -94,5 +93,3 @@ def iterate_through_directory(root_directory: str):
     csv_path = root_directory + "/minedRepos.csv"
     print("Repository Mining Completed")
     final_dataframe.to_csv(csv_path)
-
-# def iterate_through_paths(path_list):
