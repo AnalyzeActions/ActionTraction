@@ -1,6 +1,7 @@
 from pydriller import Repository
 import statistics
 import pandas as pd
+import datetime
 
 
 def determine_repositories(initial_data):
@@ -45,8 +46,10 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
             new_data = initial_data.loc[initial_data['File'] == file]
             date_list = new_data["Date of Change"].tolist()
             file_start = date_list[0]
+            file_start_datetime = datetime.datetime.fromisoformat(file_start)
             file_end = date_list[len(date_list) - 1]
-            file_lifetime = file_end - file_start
+            file_end_datetime = datetime.datetime.fromisoformat(file_end)
+            file_lifetime = file_end_datetime - file_start_datetime
             percentage_of_lifetime = (file_lifetime / repository_lifetime) * 100
 
             lifetime_dictionary["Repository"] = [repo]
@@ -146,11 +149,11 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
                 committer_percentage_contribution = (unique_committer_contribution) / len(committer_list) * 100
                 list_percentage_contributions.append(committer_percentage_contribution)
                 
-                author_dictionary["Repository"] = [repo]
-                author_dictionary["File"] = [file]
-                author_dictionary["Author"] = [unique_committer]
-                author_dictionary["Number Corresponding Commits"] = unique_committer_contribution
-                author_dictionary["Percentage Contribution"] = [committer_percentage_contribution]
+                committer_dictionary["Repository"] = [repo]
+                committer_dictionary["File"] = [file]
+                committer_dictionary["Author"] = [unique_committer]
+                committer_dictionary["Number Corresponding Commits"] = unique_committer_contribution
+                committer_dictionary["Percentage Contribution"] = [committer_percentage_contribution]
                 initial_dataframe = pd.DataFrame.from_dict(committer_dictionary, orient="columns")
                 dataframe_list.append(initial_dataframe)
     
@@ -232,7 +235,9 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
     return removed_dataframe
 
 
-def perform_specified_summarization(specified_metrics, initial_data):
+def perform_specified_summarization(specified_metrics, directory):
+    csv_path = directory + "/minedRepos.csv"
+    initial_data = pd.read_csv(csv_path)
     repository_set = determine_repositories(initial_data)
     repo_file_dict = determine_files_per_repo(initial_data, repository_set)
 
@@ -246,6 +251,7 @@ def perform_specified_summarization(specified_metrics, initial_data):
         print(size_results)
     if "Lifetime" in specified_metrics:
         lifetime_results = calculate_file_lifetime(initial_data, repo_file_dict)
+        print(lifetime_results)
     if "Diff" in specified_metrics:
         added_results = calculate_lines_added_metrics(initial_data, repo_file_dict)
         removed_results = calculate_lines_removed_metrics(initial_data, repo_file_dict)

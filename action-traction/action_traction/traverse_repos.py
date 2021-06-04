@@ -69,6 +69,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
         raw_data["Lines Added"] = lines_added_list
         raw_data["Lines Removed"] = lines_deleted_list
         raw_data["Date of Change"] = date_list
+
     first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
     
     return first_dataframe
@@ -90,6 +91,8 @@ def iterate_through_directory(root_directory: str):
     
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
-    return final_dataframe
+    csv_path = root_directory + "/minedRepos.csv"
+    print("Repository Mining Completed")
+    final_dataframe.to_csv(csv_path)
 
 # def iterate_through_paths(path_list):
