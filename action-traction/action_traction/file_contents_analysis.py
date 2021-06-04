@@ -2,6 +2,7 @@ from pydriller import Repository
 import os
 import pathlib
 import pandas as pd
+import yaml
 
 def determine_file_contents(repository_path: str):
     actions_files = []
@@ -14,13 +15,9 @@ def determine_file_contents(repository_path: str):
         for modification in commit.modified_files:
             if ".github" in str(modification.new_path):
                 actions_files.append(modification.source_code)
-                # print(modification.new_path)
                 file_name_list.append(modification.new_path)
                 repository_path_list.append(repository_path)
 
-    # print(len(file_name_list))
-    # print(len(repository_path))
-    # print(len(actions_files))
                 source_code_dict["Repository"] = [repository_path]
                 source_code_dict["File"] = [modification.new_path]
                 source_code_dict["Source Code"] = modification.source_code
@@ -29,7 +26,6 @@ def determine_file_contents(repository_path: str):
     for result in dataframe_list:
         source_code_dataframe = source_code_dataframe.append(result)
     return source_code_dataframe
-    # print(source_code_dict)
 
 
 def iterate_through_directory(root_directory: str):
@@ -47,4 +43,28 @@ def iterate_through_directory(root_directory: str):
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
     
-    print(final_dataframe)
+    return final_dataframe
+
+
+def generate_abstract_syntax_trees(source_code_dataframe):
+    yaml_list = []
+    source_code_list = source_code_dataframe["Source Code"].tolist()
+    # print(len(source_code_list))
+    for source_code in source_code_list:
+        if source_code is not None:
+            try:
+                parsed_yaml = yaml.safe_load(source_code)
+                # source_code_dataframe["Parse Status"] = [parsed_yaml]
+                yaml_list.append(parsed_yaml)
+                # print("Worked")
+            except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
+                # source_code_dataframe["Parse Status"] = ["Cannot parse"]
+                yaml_list.append("Cannot Parse")
+                # print("Incorrect indentation, cannot parse")
+        else:
+            yaml_list.append("No file contents")
+            # source_code_dataframe["Parse Status"] = ["No file contents"]
+    source_code_dataframe["Parse Status"] = yaml_list
+    # print(source_code_dataframe)
+    yaml_dataframe = source_code_dataframe
+    print(yaml_dataframe)

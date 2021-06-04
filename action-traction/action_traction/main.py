@@ -33,4 +33,5 @@ def basic_analysis(directory: str, analysis_selections: List[str]):
 
 @app.command()
 def action_file_analysis(directory: str):
-    actions_analysis.iterate_through_directory(directory)
+    data = actions_analysis.iterate_through_directory(directory)
+    actions_analysis.generate_abstract_syntax_trees(data)
