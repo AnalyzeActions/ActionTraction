@@ -61,4 +61,17 @@ def generate_abstract_syntax_trees(source_code_dataframe):
     source_code_dataframe["Parse Status"] = yaml_list
     yaml_dataframe = source_code_dataframe
     
+    print(yaml_dataframe)
     return yaml_dataframe
+
+# Number Nodes/Edges (AST Size)
+# Number jobs / runs
+# Types of jobs / runs (names)
+# Operating systems
+# Languages
+# Contents of each step
+# How many environment variables (env)
+# Jobs (steps) vs runs
+# Job / Run popularity
+
+

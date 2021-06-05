@@ -89,7 +89,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
             
             size_dictionary["Repository"] = [repo]
             size_dictionary["File"] = [file]
-            size_dictionary["File Size"] = size_list
+            # size_dictionary["File Size"] = size_list
             size_dictionary["Minimum"] = [minimum]
             size_dictionary["Maximum"] = [maximum]
             size_dictionary["Mean"] = [mean]
@@ -299,3 +299,5 @@ def perform_specified_summarization(specified_metrics: List[str], directory: str
     if "Messages" in specified_metrics:
         messages_results = calculate_commit_message_metrics(initial_data, repo_file_dict)
         print(messages_results)
+
+    # Pair analyses to .csv file paths
