@@ -15,11 +15,9 @@ def determine_files_per_repo(initial_data, repository_set):
     repo_file_dict = {}
     for repository in repository_set:
         new_data = initial_data.loc[initial_data['Repository'] == repository]
-        # print(new_data)
         file_list = new_data["File"].tolist()
         file_set = set(file_list)
         repo_file_dict[repository] = file_set
-    # print(repo_file_dict)
     return repo_file_dict
 
 
