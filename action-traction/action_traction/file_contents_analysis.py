@@ -4,6 +4,7 @@ import os
 import pathlib
 import pandas as pd
 import yaml
+import re
 
 def determine_file_contents(repository_path: str):
     actions_files = []
@@ -22,6 +23,7 @@ def determine_file_contents(repository_path: str):
                 source_code_dict["Repository"] = [repository_path]
                 source_code_dict["File"] = [modification.new_path]
                 source_code_dict["Source Code"] = modification.source_code
+                source_code_dict["Date of Commit"] = commit.committer_date
                 code_dataframe = pd.DataFrame.from_dict(source_code_dict)
                 dataframe_list.append(code_dataframe)
     for result in dataframe_list:
@@ -166,6 +168,67 @@ def determine_operating_systems(yaml_data, repo_file_dict):
     return operating_systems_dataframe
 
 
+def determine_environments(yaml_data, repo_file_dict):
+    yaml_list = []
+    environments_list = []
+    environments_dict = {}
+    dataframe_list = []
+    environments_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = yaml_data.loc[yaml_data['File'] == file]
+            yaml_list = new_data["Parse Status"].tolist()
+        
+            for parse_tree in yaml_list:
+                # print(file)
+                defined_environments = nested_lookup('os', parse_tree)
+                environments_dict["Repository"] = [repo]
+                environments_dict["File"] = [file]
+                environments_dict["Environments Used"] = [defined_environments]
+                environments_dict["Amount of Environments Systems"] = [len(defined_environments)]
+
+                initial_data = pd.DataFrame.from_dict(environments_dict)
+                dataframe_list.append(initial_data)
+    
+    for result in dataframe_list:
+        environments_dataframe = environments_dataframe.append(result)
+
+    # print(operating_systems_dataframe)
+    return environments_dataframe
+
+
+def determine_languages(yaml_data, repo_file_dict):
+    yaml_list = []
+    languages_list = []
+    languages_dict = {}
+    dataframe_list = []
+    regex = re.compile("\w+(?:-version)")
+    languages_dataframe = pd.DataFrame()
+    for repo, file_list in repo_file_dict.items():
+        for file in file_list:
+            new_data = yaml_data.loc[yaml_data['File'] == file]
+            yaml_list = new_data["Parse Status"].tolist()
+        
+            for parse_tree in yaml_list:
+                # print(file)
+                defined_languages = nested_lookup(regex, parse_tree)
+                print(defined_languages)
+                languages_dict["Repository"] = [repo]
+                languages_dict["File"] = [file]
+                languages_dict["Environments Used"] = [defined_languages]
+                languages_dict["Amount of Environments Systems"] = [len(defined_languages)]
+
+                initial_data = pd.DataFrame.from_dict(languages_dict)
+                dataframe_list.append(initial_data)
+    
+    for result in dataframe_list:
+        languages_dataframe = languages_dataframe.append(result)
+
+    # print(operating_systems_dataframe)
+    return languages_dataframe
+
+
+
 def popularity_helper(specified_data, identifier):
     repo_metrics = []
     all_metrics = []
@@ -199,11 +262,19 @@ def popularity_helper(specified_data, identifier):
 
 def determine_steps_popularity(steps_dataframe):
     popular_steps = popularity_helper("Step Name")
+    return popular_steps
 
 
-# def determine_runs_popularity(runs_dataframe):
-#     popular_runs = popularity_helper("Run Command")
+def determine_runs_popularity(runs_dataframe):
+    popular_runs = popularity_helper("Run Command")
+    return popular_runs
 
+
+def understand_steps_lifetime(steps_dataframe, repository):
+    print(steps_dataframe["Date of Commit"])
+
+
+# def understand_runs_lifetime(runs_dataframe, repository):
 
 # def compare_steps_and_runs(runs_dataframe, steps_dataframe, repo_file_dict):
 #     runs_repositories = runs_dataframe['Repository'].tolist()
@@ -232,17 +303,35 @@ def determine_steps_popularity(steps_dataframe):
 
 
 
-def perform_specified_analysis(directory):
+def perform_specified_analysis(directory, specified_metrics):
     source_code_data = iterate_through_directory(directory)
     repo_set = determine_repositories(source_code_data)
     repo_file_dict = determine_files_per_repo(source_code_data, repo_set)
     yaml_data = generate_abstract_syntax_trees(source_code_data)
-    steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
-    runs_dataframe = determine_runs(yaml_data, repo_file_dict)
 
-    # determine_operating_systems(yaml_data, repo_file_dict)
-    # popularity_helper(steps_dataframe, "Step Name")
-    compare_steps_and_runs(runs_dataframe, steps_dataframe)
+    if "Actions" in specified_metrics:
+        steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
+        popular_steps = determine_steps_popularity(steps_dataframe)
+        print(steps_dataframe)
+        print(popular_steps)
+    if "Commands" in specified_metrics:
+        commands_dataframe = determine_runs(yaml_data, repo_file_dict)
+        popular_commands = determine_runs_popularity(commands_dataframe)
+        print(commands_dataframe)
+        print(popular_commands)
+    # if "Comparison" in specified_metrics:
+    #     steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
+    #     commands_dataframe = determine_runs(yaml_daata, repo_file_dict)
+    #     comparison = compare_steps_and_runs(steps_dataframe, commands_dataframe)
+    #     print(comparison)
+    # if "Lifetime" in specified_metrics:
+    if "Setup" in specified_metrics:
+        operating_systems = determine_operating_systems(yaml_data, repo_file_dict)
+        environments = determine_environments(yaml_data, repo_file_dict)
+        determine_languages(yaml_data, repo_file_dict)
+        # print(operating_systems)
+        # print(environments)
+        # print(languages)
 
 
 # Number Nodes/Edges (AST Size)

@@ -31,8 +31,8 @@ def basic_analysis(directory: str, analysis_selections: List[str]):
 
 
 @app.command()
-def action_file_analysis(directory: str):
+def action_file_analysis(directory: str, analysis_selections: List[str]):
     # , csv_pathway: str
     # data = actions_analysis.iterate_through_directory(directory)
     # actions_analysis.generate_abstract_syntax_trees(data, csv_pathway)
-    actions_analysis.perform_specified_analysis(directory)
+    actions_analysis.perform_specified_analysis(directory, analysis_selections)
