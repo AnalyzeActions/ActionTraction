@@ -134,7 +134,6 @@ def determine_runs(yaml_data, repo_file_dict):
     for result in dataframe_list:
         runs_dataframe = runs_dataframe.append(result)
 
-    print(runs_dataframe)
     return runs_dataframe
 
 
@@ -163,16 +162,73 @@ def determine_operating_systems(yaml_data, repo_file_dict):
     for result in dataframe_list:
         operating_systems_dataframe = operating_systems_dataframe.append(result)
 
-    print(operating_systems_dataframe)
+    # print(operating_systems_dataframe)
     return operating_systems_dataframe
 
 
-# def compare_steps_and_runs(runs_dataframe, steps_dataframe):
+def popularity_helper(specified_data, identifier):
+    repo_metrics = []
+    all_metrics = []
+    repo_count = 0
+    popularity_dict = {}
+    metric_names = []
+    amount_repos = []
+    percentage_list = []
+    # Generate set of repositories
+    total_repositories = specified_data['Repository'].tolist()
+    individual_repos = set(total_repositories)
+    for repo in individual_repos:
+        new_data = specified_data.loc[specified_data['Repository'] == repo]
+        identifier_list = new_data[identifier].tolist()
+        if identifier_list is not None:
+            repo_count = repo_count + 1
+        repo_set = {}
+        for multiple_items in identifier_list:
+            for item in multiple_items:
+                repo_metrics.append(item)
+                repo_set = set(repo_metrics)
+        for metric in repo_set:
+            all_metrics.append(metric)
+        
+    final_set = set(all_metrics)
+    for individual_metric in all_metrics:
+        popularity_dict[individual_metric] = all_metrics.count(individual_metric)
+
+    return popularity_dict
 
 
-# def determine_steps_popularity(steps_dataframe):
+def determine_steps_popularity(steps_dataframe):
+    popular_steps = popularity_helper("Step Name")
+
 
 # def determine_runs_popularity(runs_dataframe):
+#     popular_runs = popularity_helper("Run Command")
+
+
+# def compare_steps_and_runs(runs_dataframe, steps_dataframe, repo_file_dict):
+#     runs_repositories = runs_dataframe['Repository'].tolist()
+#     runs_repos = set(runs_repositories)
+#     steps_repositories = steps_dataframe['Repository'].tolist()
+#     steps_repos = set(steps_repositories)
+#     total_runs = {}
+#     total_steps = {}
+#     comparison_dict = {}
+#     for repo in runs_repos:
+#         runs_data = runs_dataframe.loc[runs_dataframe['Repository'] == repo]
+#         amount_of_runs = runs_data["Amount of Defined Commands"].tolist()
+#         total_runs[repo] = amount_of_runs[len(amount_of_runs) - 1]
+#     for repo in steps_repos:
+#         steps_data = steps_dataframe.loc[steps_dataframe['Repository'] == repo]
+#         amount_of_steps = steps_dataframe["Amount of Steps"].tolist()
+#         total_steps[repo] = amount_of_steps[len(amount_of_steps) - 1]
+
+
+
+
+
+
+
+
 
 
 
@@ -181,8 +237,12 @@ def perform_specified_analysis(directory):
     repo_set = determine_repositories(source_code_data)
     repo_file_dict = determine_files_per_repo(source_code_data, repo_set)
     yaml_data = generate_abstract_syntax_trees(source_code_data)
-    # determine_steps_run(yaml_data, repo_file_dict)
-    determine_operating_systems(yaml_data, repo_file_dict)
+    steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
+    runs_dataframe = determine_runs(yaml_data, repo_file_dict)
+
+    # determine_operating_systems(yaml_data, repo_file_dict)
+    # popularity_helper(steps_dataframe, "Step Name")
+    compare_steps_and_runs(runs_dataframe, steps_dataframe)
 
 
 # Number Nodes/Edges (AST Size)
