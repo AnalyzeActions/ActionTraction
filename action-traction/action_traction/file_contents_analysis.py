@@ -181,7 +181,7 @@ def determine_environments(yaml_data, repo_file_dict):
         
             for parse_tree in yaml_list:
                 # print(file)
-                defined_environments = nested_lookup('os', parse_tree)
+                defined_environments = nested_lookup('env', parse_tree)
                 environments_dict["Repository"] = [repo]
                 environments_dict["File"] = [file]
                 environments_dict["Environments Used"] = [defined_environments]
@@ -202,7 +202,7 @@ def determine_languages(yaml_data, repo_file_dict):
     languages_list = []
     languages_dict = {}
     dataframe_list = []
-    regex = re.compile("\w+(?:-version)")
+    regex = re.compile(r"\w+(?:-version)")
     languages_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
@@ -224,7 +224,6 @@ def determine_languages(yaml_data, repo_file_dict):
     for result in dataframe_list:
         languages_dataframe = languages_dataframe.append(result)
 
-    # print(operating_systems_dataframe)
     return languages_dataframe
 
 
@@ -328,10 +327,10 @@ def perform_specified_analysis(directory, specified_metrics):
     if "Setup" in specified_metrics:
         operating_systems = determine_operating_systems(yaml_data, repo_file_dict)
         environments = determine_environments(yaml_data, repo_file_dict)
-        determine_languages(yaml_data, repo_file_dict)
-        # print(operating_systems)
-        # print(environments)
-        # print(languages)
+        languages = determine_languages(yaml_data, repo_file_dict) # Regular expression not currently working
+        print(operating_systems)
+        print(environments)
+        print(languages)
 
 
 # Number Nodes/Edges (AST Size)
