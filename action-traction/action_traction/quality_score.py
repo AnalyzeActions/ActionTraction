@@ -1,5 +1,6 @@
 from pydriller import Repository
 from nested_lookup import nested_lookup
+import numpy as np
 import os
 import pathlib
 import pandas as pd
@@ -144,6 +145,7 @@ def determine_cyclomatic_complexity(yaml_dataframe):
 
 def determine_raw_metrics(source_code_dataframe):
     comments_list = []
+    lines_code = []
     lines_source_code = []
     raw_metrics_dict = {}
     source_code_list = source_code_dataframe["Source Code"].tolist()
@@ -151,17 +153,25 @@ def determine_raw_metrics(source_code_dataframe):
 
     # print(source_code_list[0])
     for source_code in source_code_list:
-        #TODO: Make comments countable for all languages
         number_comments = source_code.count("#")
         comments_list.append(number_comments)
 
-        #TODO: What is SLOC exactly??
+        #TODO: What is SLOC exactly?? All of the lines - number of comments (commented vs executable) NCSS (non commented source statements)
         sloc = len(source_code.splitlines())
-        lines_source_code.append(sloc)
+        lines_code.append(sloc)
+
+        ncss = sloc - number_comments
+        lines_source_code.append(ncss)
+
 
     raw_metrics_dict["File"] = file_list
     raw_metrics_dict["Number of Comments"] = comments_list
-    raw_metrics_dict["SLOC"] = lines_source_code
+    raw_metrics_dict["LOC"] = lines_code
+    raw_metrics_dict["NCSS"] = lines_source_code
+
+    # Lines of Code (entire file)
+    # NCSS
+    # Comment ratios
 
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
 
@@ -169,12 +179,29 @@ def determine_raw_metrics(source_code_dataframe):
 
 
 def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
-    cc = complexity_data["Cyclomatic Complexity Score"]
-    volume = halstead_data["Volume"]
+    cyclomatic_complexity = complexity_data["Cyclomatic Complexity Score"].tolist()
+    volume = halstead_data["Volume"].tolist()
+    combination = pd.DataFrame()
+    # combination = halstead_data
+    combination = raw_metrics_data
+    combination["CC"] = cyclomatic_complexity
+    combination["Volume"] = volume
+    
+    return combination
 
-    combination = raw_metrics_data.append(cc)
-
-# def calculate_maintainability(complete_dataframe):
+def calculate_maintainability(complete_dataframe):
+    for index, row in complete_dataframe.iterrows():
+        v = row["Volume"]
+        cc = row["CC"]
+        ncss = row["NCSS"]
+        c = row["Number of Comments"]
+        # original_maintainability = 171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss)))
+        # print(original_maintainability)
+        # sei_maintainability = 171 - (5.2 * (np.log2(v))) - (0.23 * cc) - (16.2 * (np.log2(ncss))) + (50 * math.sin(math.sqrt(2.4 * c)))
+        # print(sei_maintainability)
+        vs_division = (171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss))))/171
+        vs_maintainability = max(0, 100 * vs_division)
+        print(vs_maintainability)
 
 
 
@@ -184,7 +211,7 @@ def final_score(repository_path, score_choices):
     
     if "Halstead" in score_choices:
         halstead_data = determine_halstead_metrics(yaml_dataframe)
-        print(halstead_data)
+        # print(halstead_data)
     if "Complexity" in score_choices:
         complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
         print(complexity_data)
@@ -192,8 +219,12 @@ def final_score(repository_path, score_choices):
         raw_metrics_data = determine_raw_metrics(source_code_dataframe)
         print(raw_metrics_data)
     if "Maintainability" in score_choices:
-        print("Coming Soon")
+        halstead_data = determine_halstead_metrics(yaml_dataframe)
+        complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
+        raw_metrics_data = determine_raw_metrics(source_code_dataframe)
+        combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
+        calculate_maintainability(combined_data)
 
     
-    # combine_metrics(halstead_data, complexity_data, raw_metrics_data)
+
 
