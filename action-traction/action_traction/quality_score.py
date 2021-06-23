@@ -125,11 +125,12 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     return halstead_data
 
 
-def determine_cyclomatic_complexity(yaml_dataframe):
+def determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe):
     total_complexity_list = []
     complexity_dict = {}
     abstract_trees_list = yaml_dataframe["Parse Status"].tolist()
     file_list = yaml_dataframe["File"].tolist()
+    date_list = source_code_dataframe["Date of Commit"].tolist()
 
     for tree in abstract_trees_list:
         if_amount = nested_lookup("if", tree)
@@ -148,10 +149,12 @@ def determine_cyclomatic_complexity(yaml_dataframe):
         total_complexity = if_complexity + elif_complexity + matrix_complexity + with_complexity + env_complexity
         total_complexity_list.append(total_complexity)
 
+    complexity_dict["Date"] = date_list
     complexity_dict["File"] = file_list
     complexity_dict["Cyclomatic Complexity Score"] = total_complexity_list
 
     complexity_data = pd.DataFrame.from_dict(complexity_dict)
+    complexity_data.set_index("Date", inplace=True)
 
     plot = complexity_data.plot()
     figure = plot.get_figure()
@@ -169,7 +172,7 @@ def determine_raw_metrics(source_code_dataframe):
     raw_metrics_dict = {}
     source_code_list = source_code_dataframe["Source Code"].tolist()
     file_list = source_code_dataframe["File"].tolist()
-
+    date_list = source_code_dataframe["Date of Commit"].tolist()
     # print(source_code_list[0])
     for source_code in source_code_list:
         number_comments = source_code.count("#")
@@ -187,7 +190,7 @@ def determine_raw_metrics(source_code_dataframe):
         ncss_ratio = (number_comments / ncss) * 100
         ncss_ratio_list.append(ncss_ratio)
 
-
+    raw_metrics_dict["Date"] = date_list
     raw_metrics_dict["File"] = file_list
     raw_metrics_dict["Number of Comments"] = comments_list
     raw_metrics_dict["LOC"] = lines_code
@@ -196,7 +199,7 @@ def determine_raw_metrics(source_code_dataframe):
     raw_metrics_dict["Comments to Lines of Code Comparison"] = ncss_ratio_list
 
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
-
+    raw_metrics_data.set_index("Date", inplace=True)
     plot = raw_metrics_data.plot()
     figure = plot.get_figure()
 
@@ -280,14 +283,14 @@ def final_score(repository_path, score_choices):
         halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
         print(halstead_data)
     if "Complexity" in score_choices:
-        complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
+        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
         print(complexity_data)
     if "RawMetrics" in score_choices:
         raw_metrics_data = determine_raw_metrics(source_code_dataframe)
         print(raw_metrics_data)
     if "Maintainability" in score_choices:
-        halstead_data = determine_halstead_metrics(yaml_dataframe)
-        complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
+        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
+        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
         raw_metrics_data = determine_raw_metrics(source_code_dataframe)
         combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
         maintainability_data = calculate_maintainability(combined_data)
