@@ -1,11 +1,9 @@
 from pydriller import Repository
 from nested_lookup import nested_lookup
 import numpy as np
-import os
-import pathlib
 import pandas as pd
+import matplotlib.pyplot as plt
 import yaml
-import re
 import math
 
 def determine_file_contents(repository_path: str):
@@ -47,11 +45,10 @@ def generate_abstract_syntax_trees(source_code_dataframe):
             yaml_list.append("No file contents")
     source_code_dataframe["Parse Status"] = yaml_list
     yaml_dataframe = source_code_dataframe
-    
-    # yaml_dataframe.to_csv(csv_url)
+
     return yaml_dataframe
 
-def determine_halstead_metrics(yaml_dataframe):
+def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     distinct_operators = 0
     distinct_operands = 0
     halstead_dict = {}
@@ -60,17 +57,15 @@ def determine_halstead_metrics(yaml_dataframe):
     volume_list = []
     difficulty_list = []
     effort_list = []
+    halstead_dataframe = pd.DataFrame()
     abstract_trees_list = yaml_dataframe["Parse Status"].tolist()
     file_list = yaml_dataframe["File"].tolist()
+    date_list = source_code_dataframe["Date of Commit"].tolist()
 
-    # print(abstract_trees_list[4])
     for tree in abstract_trees_list:
-        # print("Start of Tree")
-        # print(tree)
         uses_operator_list = nested_lookup("uses", tree)
         runs_operator_list = nested_lookup("run", tree)
         total_operators = len(uses_operator_list) + len(runs_operator_list)
-        #TODO: Is this boolean working properly??
         if len(uses_operator_list) != 0:
             distinct_operators = distinct_operators + 1
         if len(runs_operator_list) != 0:
@@ -89,11 +84,6 @@ def determine_halstead_metrics(yaml_dataframe):
             distinct_operands = distinct_operands + 1
         if len(env_operand_list) != 0 :
             distinct_operands = distinct_operands + 1
-        
-        # print("Distinct Operators " + str(distinct_operators))
-        # print("Distinct Operands " + str(distinct_operands))
-        # print("Total Operators " + str(total_operators))
-        # print("Total Operands " + str(total_operands))
 
         if distinct_operators != 0 and distinct_operands != 0 and total_operators != 0 and total_operands != 0:
             vocab = distinct_operators + distinct_operands
@@ -106,17 +96,17 @@ def determine_halstead_metrics(yaml_dataframe):
             difficulty_list.append(difficulty)
             effort = difficulty * volume
             effort_list.append(effort)
-            # print(volume)
         else:
-            vocab_list.append("NaN")
-            length_list.append("NaN")
-            volume_list.append("NaN")
-            difficulty_list.append("NaN")
-            effort_list.append("NaN")
+            vocab_list.append(np.nan)
+            length_list.append(np.nan)
+            volume_list.append(np.nan)
+            difficulty_list.append(np.nan)
+            effort_list.append(np.nan)
 
         distinct_operators = 0
         distinct_operands = 0
 
+    halstead_dict["Date"] = date_list
     halstead_dict["File"] = file_list
     halstead_dict["Vocabulary"] = vocab_list
     halstead_dict["Length"] = length_list
@@ -125,6 +115,13 @@ def determine_halstead_metrics(yaml_dataframe):
     halstead_dict["Effort"] = effort_list
 
     halstead_data = pd.DataFrame.from_dict(halstead_dict)
+    halstead_data.set_index('Date', inplace=True)
+        
+    plot = halstead_data.plot()
+    figure = plot.get_figure()
+
+    figure.savefig("images/Halstead.png")
+
     return halstead_data
 
 
@@ -272,7 +269,7 @@ def final_score(repository_path, score_choices):
     yaml_dataframe = generate_abstract_syntax_trees(source_code_dataframe)
     
     if "Halstead" in score_choices:
-        halstead_data = determine_halstead_metrics(yaml_dataframe)
+        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
         print(halstead_data)
     if "Complexity" in score_choices:
         complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
