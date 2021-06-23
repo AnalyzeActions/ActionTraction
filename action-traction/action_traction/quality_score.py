@@ -153,6 +153,10 @@ def determine_cyclomatic_complexity(yaml_dataframe):
 
     complexity_data = pd.DataFrame.from_dict(complexity_dict)
 
+    plot = complexity_data.plot()
+    figure = plot.get_figure()
+
+    figure.savefig("images/CyclomaticComplexity.png")
     return complexity_data
 
 
@@ -193,6 +197,10 @@ def determine_raw_metrics(source_code_dataframe):
 
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
 
+    plot = raw_metrics_data.plot()
+    figure = plot.get_figure()
+
+    figure.savefig("images/RawMetrics.png")
     return raw_metrics_data
 
 
