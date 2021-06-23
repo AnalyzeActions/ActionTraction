@@ -264,6 +264,7 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
     maintainability_data = pd.DataFrame.from_dict(maintainability_dict)
     
     maintainability_data.set_index("Date", inplace=True)
+
     plot = maintainability_data.plot()
     figure = plot.get_figure()
 
@@ -284,7 +285,10 @@ def combine_with_maintainability(complete_dataframe, maintainability_data):
     complete_dataframe["SEI Maintainability Index"] = sei
     complete_dataframe["Microsoft Maintainability Index"] = microsoft
 
+    plot = complete_dataframe.plot()
+    figure = plot.get_figure()
 
+    figure.savefig("images/AllMetrics.png")
 
     return complete_dataframe
 
