@@ -163,6 +163,8 @@ def determine_raw_metrics(source_code_dataframe):
     comments_list = []
     lines_code = []
     lines_source_code = []
+    total_lines_ratio_list = []
+    ncss_ratio_list = []
     raw_metrics_dict = {}
     source_code_list = source_code_dataframe["Source Code"].tolist()
     file_list = source_code_dataframe["File"].tolist()
@@ -178,12 +180,19 @@ def determine_raw_metrics(source_code_dataframe):
         ncss = sloc - number_comments
         lines_source_code.append(ncss)
 
+        total_lines_ratio = (number_comments / sloc) * 100
+        total_lines_ratio_list.append(total_lines_ratio)
+
+        ncss_ratio = (number_comments / ncss) * 100
+        ncss_ratio_list.append(ncss_ratio)
+
 
     raw_metrics_dict["File"] = file_list
     raw_metrics_dict["Number of Comments"] = comments_list
     raw_metrics_dict["LOC"] = lines_code
     raw_metrics_dict["NCSS"] = lines_source_code
-    # TODO: Comment ratios
+    raw_metrics_dict["Comments to Total Lines Comparison"] = total_lines_ratio_list
+    raw_metrics_dict["Comments to Lines of Code Comparison"] = ncss_ratio_list
 
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
 
@@ -193,13 +202,21 @@ def determine_raw_metrics(source_code_dataframe):
 def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
     cyclomatic_complexity = complexity_data["Cyclomatic Complexity Score"].tolist()
     volume = halstead_data["Volume"].tolist()
+    vocab = halstead_data["Vocabulary"].tolist()
+    length = halstead_data["Length"].tolist()
+    difficulty = halstead_data["Difficulty"].tolist()
+    effort = halstead_data["Effort"].tolist()
+
     combination = pd.DataFrame()
-    # combination = halstead_data
     combination = raw_metrics_data
-    combination["CC"] = cyclomatic_complexity
+    combination["Cyclomatic Complexity"] = cyclomatic_complexity
     combination["Volume"] = volume
+    combination["Vocabulary"] = vocab
+    combination["Difficulty"] = difficulty
+    combination["Effort"] = effort
     
     return combination
+
 
 def calculate_maintainability(complete_dataframe):
     original_maintainability_list = []
@@ -209,7 +226,7 @@ def calculate_maintainability(complete_dataframe):
     file_list = complete_dataframe["File"].tolist()
     for index, row in complete_dataframe.iterrows():
         v = row["Volume"]
-        cc = row["CC"]
+        cc = row["Cyclomatic Complexity"]
         ncss = row["NCSS"]
         c = row["Number of Comments"]
 
@@ -232,7 +249,22 @@ def calculate_maintainability(complete_dataframe):
     maintainability_dict["Microsoft Maintainability Index"] = vs_maintainability_list
 
     maintainability_data = pd.DataFrame.from_dict(maintainability_dict)
-    print(maintainability_data)
+    return maintainability_data
+
+
+def combine_with_maintainability(complete_dataframe, maintainability_data):
+    final_dataframe = pd.DataFrame()
+    original = maintainability_data["Original Maintainability Index"].tolist()
+    sei = maintainability_data["SEI Maintainability Index"].tolist()
+    microsoft = maintainability_data["Microsoft Maintainability Index"].tolist()
+
+    final_dataframe = complete_dataframe
+
+    complete_dataframe["Origianl Maintainability Index"] = original
+    complete_dataframe["SEI Maintainability Index"] = sei
+    complete_dataframe["Microsoft Maintainability Index"] = microsoft
+
+    return complete_dataframe
 
 
 def final_score(repository_path, score_choices):
@@ -241,7 +273,7 @@ def final_score(repository_path, score_choices):
     
     if "Halstead" in score_choices:
         halstead_data = determine_halstead_metrics(yaml_dataframe)
-        # print(halstead_data)
+        print(halstead_data)
     if "Complexity" in score_choices:
         complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
         print(complexity_data)
@@ -253,8 +285,13 @@ def final_score(repository_path, score_choices):
         complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
         raw_metrics_data = determine_raw_metrics(source_code_dataframe)
         combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
-        calculate_maintainability(combined_data)
-
-    
-
-
+        maintainability_data = calculate_maintainability(combined_data)
+        print(maintainability_data)
+    if "AllMetrics" in score_choices:
+        halstead_data = determine_halstead_metrics(yaml_dataframe)
+        complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
+        raw_metrics_data = determine_raw_metrics(source_code_dataframe)
+        combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
+        maintainability_data = calculate_maintainability(combined_data)
+        final_dataframe = combine_with_maintainability(combined_data, maintainability_data)
+        print(final_dataframe)
