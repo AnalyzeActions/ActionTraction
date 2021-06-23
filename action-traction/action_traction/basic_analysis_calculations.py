@@ -57,12 +57,21 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
             lifetime_dictionary["File Lifetime"] = [file_lifetime]
             lifetime_dictionary["Percentage of File Existence"] = percentage_of_lifetime
 
+            for date in date_list:
+                lifetime_dictionary["Date"] = [date]
+
             initial_lifetime_dataframe = pd.DataFrame.from_dict(lifetime_dictionary)
             dataframe_list.append(initial_lifetime_dataframe)
         
     for result in dataframe_list:
         lifetime_dataframe = lifetime_dataframe.append(result)
 
+    # lifetime_dataframe.set_index(["Date", "Repository"], inplace=True)
+    
+    # plot = lifetime_dataframe.plot()
+    # figure = plot.get_figure()
+
+    # figure.savefig("images/Lifetime.png")
     return lifetime_dataframe
 
 
