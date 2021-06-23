@@ -46,6 +46,7 @@ def iterate_through_directory(root_directory: str):
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
     
+    print(final_dataframe)
     return final_dataframe
 
 
@@ -260,17 +261,17 @@ def popularity_helper(specified_data, identifier):
 
 
 def determine_steps_popularity(steps_dataframe):
-    popular_steps = popularity_helper("Step Name")
+    popular_steps = popularity_helper(steps_dataframe, "Step Name")
     return popular_steps
 
 
 def determine_runs_popularity(runs_dataframe):
-    popular_runs = popularity_helper("Run Command")
+    popular_runs = popularity_helper(runs_dataframe, "Run Command")
     return popular_runs
 
 
-def understand_steps_lifetime(steps_dataframe, repository):
-    print(steps_dataframe["Date of Commit"])
+# def understand_steps_lifetime(steps_dataframe, repository):
+#     print(steps_dataframe["Date of Commit"])
 
 
 # def understand_runs_lifetime(runs_dataframe, repository):

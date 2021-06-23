@@ -5,6 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import yaml
 import math
+import pathlib
+import os
 
 def determine_file_contents(repository_path: str):
     actions_files = []
