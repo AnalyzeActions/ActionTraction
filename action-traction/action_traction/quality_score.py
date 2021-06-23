@@ -226,12 +226,16 @@ def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
     return combination
 
 
-def calculate_maintainability(complete_dataframe):
+def calculate_maintainability(complete_dataframe, source_code_dataframe):
     original_maintainability_list = []
     sei_maintainability_list = []
     vs_maintainability_list = []
     maintainability_dict = {}
     file_list = complete_dataframe["File"].tolist()
+    date_list = source_code_dataframe["Date of Commit"].tolist()
+    index = complete_dataframe.index
+    # date_list = complete_dataframe["Date"].tolist()
+    # print(date_list)
     for index, row in complete_dataframe.iterrows():
         v = row["Volume"]
         cc = row["Cyclomatic Complexity"]
@@ -250,13 +254,21 @@ def calculate_maintainability(complete_dataframe):
             original_maintainability_list.append("NaN")
             sei_maintainability_list.append("NaN")
             vs_maintainability_list.append("NaN")
-        
+    
+    maintainability_dict["Date"] = date_list
     maintainability_dict["File"] = file_list
     maintainability_dict["Original Maintainability Index"] = original_maintainability_list
     maintainability_dict["SEI Maintainability Index"] = sei_maintainability_list
     maintainability_dict["Microsoft Maintainability Index"] = vs_maintainability_list
 
     maintainability_data = pd.DataFrame.from_dict(maintainability_dict)
+    
+    maintainability_data.set_index("Date", inplace=True)
+    plot = maintainability_data.plot()
+    figure = plot.get_figure()
+
+    figure.savefig("images/Maintainability.png")
+
     return maintainability_data
 
 
@@ -271,6 +283,8 @@ def combine_with_maintainability(complete_dataframe, maintainability_data):
     complete_dataframe["Origianl Maintainability Index"] = original
     complete_dataframe["SEI Maintainability Index"] = sei
     complete_dataframe["Microsoft Maintainability Index"] = microsoft
+
+
 
     return complete_dataframe
 
@@ -293,13 +307,13 @@ def final_score(repository_path, score_choices):
         complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
         raw_metrics_data = determine_raw_metrics(source_code_dataframe)
         combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
-        maintainability_data = calculate_maintainability(combined_data)
+        maintainability_data = calculate_maintainability(combined_data, source_code_dataframe)
         print(maintainability_data)
     if "AllMetrics" in score_choices:
-        halstead_data = determine_halstead_metrics(yaml_dataframe)
-        complexity_data = determine_cyclomatic_complexity(yaml_dataframe)
+        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
+        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
         raw_metrics_data = determine_raw_metrics(source_code_dataframe)
         combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
-        maintainability_data = calculate_maintainability(combined_data)
+        maintainability_data = calculate_maintainability(combined_data, source_code_dataframe)
         final_dataframe = combine_with_maintainability(combined_data, maintainability_data)
         print(final_dataframe)
