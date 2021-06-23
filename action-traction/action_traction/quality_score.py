@@ -63,8 +63,10 @@ def determine_halstead_metrics(yaml_dataframe):
     abstract_trees_list = yaml_dataframe["Parse Status"].tolist()
     file_list = yaml_dataframe["File"].tolist()
 
-    # print(len(abstract_trees_list))
+    # print(abstract_trees_list[4])
     for tree in abstract_trees_list:
+        # print("Start of Tree")
+        # print(tree)
         uses_operator_list = nested_lookup("uses", tree)
         runs_operator_list = nested_lookup("run", tree)
         total_operators = len(uses_operator_list) + len(runs_operator_list)
@@ -88,18 +90,32 @@ def determine_halstead_metrics(yaml_dataframe):
         if len(env_operand_list) != 0 :
             distinct_operands = distinct_operands + 1
         
-        vocab = distinct_operators + distinct_operands
-        vocab_list.append(vocab)
-        length = total_operators + total_operands
-        length_list.append(length)
-        volume = length * (math.log(vocab, 2))
-        volume_list.append(volume)
-        difficulty = (distinct_operators / 2) * (total_operands / distinct_operands)
-        difficulty_list.append(difficulty)
-        effort = difficulty * volume
-        effort_list.append(effort)
-        # print(volume)
+        # print("Distinct Operators " + str(distinct_operators))
+        # print("Distinct Operands " + str(distinct_operands))
+        # print("Total Operators " + str(total_operators))
+        # print("Total Operands " + str(total_operands))
 
+        if distinct_operators != 0 and distinct_operands != 0 and total_operators != 0 and total_operands != 0:
+            vocab = distinct_operators + distinct_operands
+            vocab_list.append(vocab)
+            length = total_operators + total_operands
+            length_list.append(length)
+            volume = length * (math.log(vocab, 2))
+            volume_list.append(volume)
+            difficulty = (distinct_operators / 2) * (total_operands / distinct_operands)
+            difficulty_list.append(difficulty)
+            effort = difficulty * volume
+            effort_list.append(effort)
+            # print(volume)
+        else:
+            vocab_list.append("NaN")
+            length_list.append("NaN")
+            volume_list.append("NaN")
+            difficulty_list.append("NaN")
+            effort_list.append("NaN")
+
+        distinct_operators = 0
+        distinct_operands = 0
 
     halstead_dict["File"] = file_list
     halstead_dict["Vocabulary"] = vocab_list
@@ -156,7 +172,6 @@ def determine_raw_metrics(source_code_dataframe):
         number_comments = source_code.count("#")
         comments_list.append(number_comments)
 
-        #TODO: What is SLOC exactly?? All of the lines - number of comments (commented vs executable) NCSS (non commented source statements)
         sloc = len(source_code.splitlines())
         lines_code.append(sloc)
 
@@ -168,10 +183,7 @@ def determine_raw_metrics(source_code_dataframe):
     raw_metrics_dict["Number of Comments"] = comments_list
     raw_metrics_dict["LOC"] = lines_code
     raw_metrics_dict["NCSS"] = lines_source_code
-
-    # Lines of Code (entire file)
-    # NCSS
-    # Comment ratios
+    # TODO: Comment ratios
 
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
 
@@ -190,19 +202,37 @@ def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
     return combination
 
 def calculate_maintainability(complete_dataframe):
+    original_maintainability_list = []
+    sei_maintainability_list = []
+    vs_maintainability_list = []
+    maintainability_dict = {}
+    file_list = complete_dataframe["File"].tolist()
     for index, row in complete_dataframe.iterrows():
         v = row["Volume"]
         cc = row["CC"]
         ncss = row["NCSS"]
         c = row["Number of Comments"]
-        # original_maintainability = 171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss)))
-        # print(original_maintainability)
-        # sei_maintainability = 171 - (5.2 * (np.log2(v))) - (0.23 * cc) - (16.2 * (np.log2(ncss))) + (50 * math.sin(math.sqrt(2.4 * c)))
-        # print(sei_maintainability)
-        vs_division = (171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss))))/171
-        vs_maintainability = max(0, 100 * vs_division)
-        print(vs_maintainability)
 
+        if v != "NaN":
+            original_maintainability = 171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss)))
+            original_maintainability_list.append(original_maintainability)
+            sei_maintainability = 171 - (5.2 * (np.log2(v))) - (0.23 * cc) - (16.2 * (np.log2(ncss))) + (50 * math.sin(math.sqrt(2.4 * c)))
+            sei_maintainability_list.append(sei_maintainability)
+            vs_division = (171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss))))/171
+            vs_maintainability = max(0, 100 * vs_division)
+            vs_maintainability_list.append(vs_maintainability)
+        else:
+            original_maintainability_list.append("NaN")
+            sei_maintainability_list.append("NaN")
+            vs_maintainability_list.append("NaN")
+        
+    maintainability_dict["File"] = file_list
+    maintainability_dict["Original Maintainability Index"] = original_maintainability_list
+    maintainability_dict["SEI Maintainability Index"] = sei_maintainability_list
+    maintainability_dict["Microsoft Maintainability Index"] = vs_maintainability_list
+
+    maintainability_data = pd.DataFrame.from_dict(maintainability_dict)
+    print(maintainability_data)
 
 
 def final_score(repository_path, score_choices):
