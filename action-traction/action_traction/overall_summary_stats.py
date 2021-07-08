@@ -7,7 +7,6 @@ import datetime
 
 def determine_repositories(initial_data):
     """Find each repository in the complete dataset of repository information."""
-
     # Create a list of all repositories
     repository_list = initial_data["Repository"].tolist()
     # Find each unique repository name return the set
