@@ -13,39 +13,103 @@ def determine_repositories(initial_data):
     return repository_set
 
 
-def determine_files_per_repo(initial_data, repository_set):
-    """Determine all GitHub Actions files for a specific repository."""
-    repo_file_dict = {}
-    
-    # Iterate through each unique repository name in the set
-    for repository in repository_set:
-        # Create a new dataset for each unique repository
-        new_data = initial_data.loc[initial_data['Repository'] == repository]
-        # Make a list of each of the files for a unique repository
-        file_list = new_data["File"].tolist()
-        # Determine each unique GitHub Actions file associated with a repository
-        file_set = set(file_list)
-        # Create a dictionary with repository as key and corresponding files as value
-        repo_file_dict[repository] = file_set
-
-    return repo_file_dict
-
-
-def size_over_time(initial_data, repo_file_dict):
+def size_over_time(initial_data, repository_set):
     """Determine the size of a file over time and generate graph."""
-    size_dict = {}
-    final_dict = {}
     dataframe_list = []
-    size_dataframe = pd.DataFrame()
+    size_data = pd.DataFrame()
 
-    # Iterate thorugh dictionary with repositories and corresponding files
-    for repo, file_list in repo_file_dict.items():
-        # Iterate through each file in a unique repository
-        for file in file_list:
-            # Create a new dataset for each file in a repo
-            new_data = initial_data.loc[initial_data['File'] == file]
-            size_list = new_data["File Size in Bytes"].tolist
+    # Iterate through every repo and generate a unique dataframe for each
+    for repo in repository_set:
+        new_data = initial_data.loc[initial_data['Repository'] == repo]
+        # Remove unnecessary columns from dataframe
+        new_data.drop(["Author", "Committer", "Branches", "Commit Message", "Lines Added", "Lines Removed", "Date of Change"], axis=1)
+        dataframe_list.append(new_data)
 
-            # TODO: Generate dataframe with index corresponding to size for each repo/file
-            # TODO: Use indexes to then create the graph (on commit one size was ______ ) for each repo/file
-            # TODO: Will allow us to compare file size for multiple repos over time (but not with time on x-axis, as times are different for repo commits)
+    # Create comprehensive dataframe with size over every commit
+    for dataframe in dataframe_list:
+        size_data = size_data.append(dataframe)
+    
+    return size_data
+
+
+def authors_over_time(initial_data, repository_set):
+    """Determine the authors of a Actions file over time and generate graph."""
+    dataframe_list = []
+    author_data = pd.DataFrame()
+
+    # Iterate through every repo and generate a unique dataframe for each
+    for repo in repository_set:
+        new_data = initial_data.loc[initial_data['Repository'] == repo]
+        # Remove unnecessary columns from dataframe
+        new_data.drop(["File Size in Bytes", "Committer", "Branches", "Commit Message", "Lines Added", "Lines Removed", "Date of Change"], axis=1)
+        #TODO: Number of authors at one time
+        dataframe_list.append(new_data)
+
+    # Create comprehensive dataframe with authors over every commit
+    for dataframe in dataframe_list:
+        author_data = author_data.append(dataframe)
+    
+    return author_data
+
+
+def committers_over_time(initial_data, repository_set):
+    """Determine the committers of a Actions file over time and generate graph."""
+    dataframe_list = []
+    committer_data = pd.DataFrame()
+
+    # Iterate through every repo and generate a unique dataframe for each
+    for repo in repository_set:
+        new_data = initial_data.loc[initial_data['Repository'] == repo]
+        # Remove unnecessary columns from dataframe
+        new_data.drop(["File Size in Bytes", "Author", "Branches", "Commit Message", "Lines Added", "Lines Removed", "Date of Change"], axis=1)
+        #TODO: Number of committers at one time
+        dataframe_list.append(new_data)
+
+    # Create comprehensive dataframe with committers over every commit
+    for dataframe in dataframe_list:
+        committer_data = committer_data.append(dataframe)
+    
+    return committer_data
+
+
+def lines_added_over_time(initial_data, repository_set):
+    """Determine the lines added to a Actions file over time and generate graph."""
+    dataframe_list = []
+    added_data = pd.DataFrame()
+
+    # Iterate through every repo and generate a unique dataframe for each
+    for repo in repository_set:
+        new_data = initial_data.loc[initial_data['Repository'] == repo]
+        # Remove unnecessary columns from dataframe
+        new_data.drop(["File Size in Bytes", "Author", "Branches", "Commit Message", "Committer", "Lines Removed", "Date of Change"], axis=1)
+        dataframe_list.append(new_data)
+
+    # Create comprehensive dataframe with lines added over every commit
+    for dataframe in dataframe_list:
+        added_data = added_data.append(dataframe)
+    
+    return added_data
+
+
+def lines_removed_over_time(initial_data, repository_set):
+    """Determine the lines removed from a Actions file over time and generate graph."""
+    dataframe_list = []
+    removed_data = pd.DataFrame()
+
+    # Iterate through every repo and generate a unique dataframe for each
+    for repo in repository_set:
+        new_data = initial_data.loc[initial_data['Repository'] == repo]
+        # Remove unnecessary columns from dataframe
+        new_data.drop(["File Size in Bytes", "Author", "Branches", "Commit Message", "Committer", "Lines Removed", "Date of Change"], axis=1)
+        dataframe_list.append(new_data)
+
+    # Create comprehensive dataframe with lines removed over every commit
+    for dataframe in dataframe_list:
+        removed_data = removed_data.append(dataframe)
+    
+    return removed_data
+
+
+
+
+
