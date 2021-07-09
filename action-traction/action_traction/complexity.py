@@ -28,6 +28,7 @@ def determine_file_contents(repository_path: str):
                 repository_path_list.append(repository_path)
 
                 # Create a dictionary relating to source code of GitHub Actions file
+                source_code_dict["Commit Hash"] = commit.hash
                 source_code_dict["Repository"] = [repository_path]
                 source_code_dict["File"] = [modification.new_path]
                 source_code_dict["Source Code"] = modification.source_code
