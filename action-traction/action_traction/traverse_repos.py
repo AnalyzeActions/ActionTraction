@@ -48,6 +48,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     file_list = []
     repository_list = []
     size_bytes_list = []
+    hash_list = []
     # Initialize dictionary for repository data
     raw_data = {}
     # Initialize pandas dataframes
@@ -61,6 +62,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             complete_file = repository_path + "/" + file
 
             # Mine repository and add all metrics to corresponding list
+            hash_list.append(commit.hash)
             file_list.append(file)
             repository_list.append(repository_path)
             author_list.append(commit.author.name)
@@ -73,6 +75,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             lines_deleted_list.append(commit.deletions)
         
         # Create a dictionary for a repository and its corresponding metrics
+        raw_data["Hash"] = hash_list
         raw_data["Repository"] = repository_list
         raw_data["File"] = file_list
         raw_data["File Size in Bytes"] = size_bytes_list
