@@ -1,4 +1,3 @@
-# from pydriller import RepositoryMining
 from pydriller import Repository
 from typing import List
 import pandas as pd

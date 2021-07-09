@@ -67,16 +67,20 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     for tree in abstract_trees_list:
         uses_operator_list = nested_lookup("uses", tree)
         runs_operator_list = nested_lookup("run", tree)
+
         total_operators = len(uses_operator_list) + len(runs_operator_list)
+
         if len(uses_operator_list) != 0:
+            # print("+1 for each existing action used")
             distinct_operators = distinct_operators + 1
         if len(runs_operator_list) != 0:
+            # print("+1 for each defined command used")
             distinct_operators = distinct_operators + 1
 
         name_operand_list = nested_lookup("name", tree)
         with_operand_list = nested_lookup("with", tree)
         env_operand_list = nested_lookup("env", tree)
-
+        
         total_operands = len(name_operand_list) + len(with_operand_list) + len(env_operand_list)
 
         #TODO: Is this boolean working properly??
@@ -119,10 +123,10 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     halstead_data = pd.DataFrame.from_dict(halstead_dict)
     halstead_data.set_index('Date', inplace=True)
         
-    plot = halstead_data.plot()
-    figure = plot.get_figure()
+    # plot = halstead_data.plot()
+    # figure = plot.get_figure()
 
-    figure.savefig("images/Halstead.png")
+    # figure.savefig("images/Halstead.png")
 
     return halstead_data
 
@@ -158,10 +162,10 @@ def determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe):
     complexity_data = pd.DataFrame.from_dict(complexity_dict)
     complexity_data.set_index("Date", inplace=True)
 
-    plot = complexity_data.plot()
-    figure = plot.get_figure()
+    # plot = complexity_data.plot()
+    # figure = plot.get_figure()
 
-    figure.savefig("images/CyclomaticComplexity.png")
+    # figure.savefig("images/CyclomaticComplexity.png")
     return complexity_data
 
 
@@ -202,10 +206,10 @@ def determine_raw_metrics(source_code_dataframe):
 
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
     raw_metrics_data.set_index("Date", inplace=True)
-    plot = raw_metrics_data.plot()
-    figure = plot.get_figure()
+    # plot = raw_metrics_data.plot()
+    # figure = plot.get_figure()
 
-    figure.savefig("images/RawMetrics.png")
+    # figure.savefig("images/RawMetrics.png")
     return raw_metrics_data
 
 
@@ -267,10 +271,10 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
     
     maintainability_data.set_index("Date", inplace=True)
 
-    plot = maintainability_data.plot()
-    figure = plot.get_figure()
+    # plot = maintainability_data.plot()
+    # figure = plot.get_figure()
 
-    figure.savefig("images/Maintainability.png")
+    # figure.savefig("images/Maintainability.png")
 
     return maintainability_data
 
@@ -287,10 +291,10 @@ def combine_with_maintainability(complete_dataframe, maintainability_data):
     complete_dataframe["SEI Maintainability Index"] = sei
     complete_dataframe["Microsoft Maintainability Index"] = microsoft
 
-    plot = complete_dataframe.plot()
-    figure = plot.get_figure()
+    # plot = complete_dataframe.plot()
+    # figure = plot.get_figure()
 
-    figure.savefig("images/AllMetrics.png")
+    # figure.savefig("images/AllMetrics.png")
 
     return complete_dataframe
 

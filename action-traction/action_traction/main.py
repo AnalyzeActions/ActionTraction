@@ -1,7 +1,7 @@
 from action_traction import download_repos
 from action_traction import traverse_repos
-from action_traction import basic_analysis_calculations as basic
-from action_traction import file_contents_analysis as actions_analysis
+# from action_traction import basic_analysis_calculations as basic
+# from action_traction import file_contents_analysis as actions_analysis
 from action_traction import quality_score
 from typing import List
 from pathlib import Path
@@ -25,16 +25,16 @@ def generate_repository_metrics(directory: str):
     traverse_repos.iterate_through_directory(directory)
 
 
-@app.command()
-def basic_analysis(directory: str, analysis_selections: List[str]):
-    """ Perform basic analysis of GitHub repositories (options: Modifiers, Size, Diff)"""
-    basic.perform_specified_summarization(analysis_selections, directory)
+# @app.command()
+# def basic_analysis(directory: str, analysis_selections: List[str]):
+#     """ Perform basic analysis of GitHub repositories (options: Modifiers, Size, Diff)"""
+#     basic.perform_specified_summarization(analysis_selections, directory)
 
 
-@app.command()
-def action_file_analysis(directory: str, analysis_selections: List[str]):
-    """Analyze the contents of GitHub Actions files."""
-    actions_analysis.perform_specified_analysis(directory, analysis_selections)
+# @app.command()
+# def action_file_analysis(directory: str, analysis_selections: List[str]):
+#     """Analyze the contents of GitHub Actions files."""
+#     actions_analysis.perform_specified_analysis(directory, analysis_selections)
 
 
 @app.command()
