@@ -9,48 +9,70 @@ import pathlib
 import os
 
 def determine_file_contents(repository_path: str):
+    """Determine the GitHub Actions files in a given repository."""
     actions_files = []
     source_code_dict = {}
     dataframe_list = []
     file_name_list = []
     repository_path_list = []
     source_code_dataframe = pd.DataFrame()
+
+    # Traverse the all of the commits in a given repository
     for commit in Repository(repository_path).traverse_commits():
+        # Look at all commits with modified fiels
         for modification in commit.modified_files:
+            # Drill repository for all commits where the GitHub Actions files were modified
             if ".github" in str(modification.new_path):
                 actions_files.append(modification.source_code)
                 file_name_list.append(modification.new_path)
                 repository_path_list.append(repository_path)
 
+                # Create a dictionary relating to source code of GitHub Actions file
                 source_code_dict["Repository"] = [repository_path]
                 source_code_dict["File"] = [modification.new_path]
                 source_code_dict["Source Code"] = modification.source_code
                 source_code_dict["Date of Commit"] = commit.committer_date
+
+                # Create a dataframe from the existing source code dictionary
                 code_dataframe = pd.DataFrame.from_dict(source_code_dict)
                 dataframe_list.append(code_dataframe)
+    
+    # Create a dataframe for entire repo and every file with source code
     for result in dataframe_list:
         source_code_dataframe = source_code_dataframe.append(result)
+    
     return source_code_dataframe
 
 
 def generate_abstract_syntax_trees(source_code_dataframe):
+    """Generate abstract syntax trees from the source code of GitHub Actions files."""
     yaml_list = []
+
+    # Generate a list of GitHub Actions source code
     source_code_list = source_code_dataframe["Source Code"].tolist()
+    # Iterate through list of source code and convert to abstract syntax tree
     for source_code in source_code_list:
         if source_code is not None:
             try:
                 parsed_yaml = yaml.safe_load(source_code)
                 yaml_list.append(parsed_yaml)
             except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
+                # Possible structure errors cause inability to parse for syntax tree generation
                 yaml_list.append("Cannot Parse")
+        # If unparseable, the file does not have any contents
         else:
             yaml_list.append("No file contents")
+    
     source_code_dataframe["Parse Status"] = yaml_list
+
+    # Generate a dataframe with source code abstract syntax trees
     yaml_dataframe = source_code_dataframe
 
     return yaml_dataframe
 
+
 def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
+    """Calculate Halstead metrics for a single repository and each file."""
     distinct_operators = 0
     distinct_operands = 0
     halstead_dict = {}
@@ -60,37 +82,58 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     difficulty_list = []
     effort_list = []
     halstead_dataframe = pd.DataFrame()
+
+    # Generate a list of source code abstract syntax trees
     abstract_trees_list = yaml_dataframe["Parse Status"].tolist()
+    # Generate a list of GitHub Actions files
     file_list = yaml_dataframe["File"].tolist()
+    # Generate a list of commit dates
     date_list = source_code_dataframe["Date of Commit"].tolist()
 
+    # Iterate through list of source code trees and search for operators and operands
     for tree in abstract_trees_list:
+        # Find existing GitHub Actions used in .yml file
         uses_operator_list = nested_lookup("uses", tree)
+        print("Found " + str(len(uses_operator_list)) + "unique GitHub Actions used.")
+        # Find user defined commands used in .yml file
         runs_operator_list = nested_lookup("run", tree)
+        print("Found " + str(len(runs_operator_list)) + "unique developer-specified commands used.")
 
+        # Calculate the total amount of operators 
         total_operators = len(uses_operator_list) + len(runs_operator_list)
 
+        # Determine distinct operators
         if len(uses_operator_list) != 0:
             # print("+1 for each existing action used")
             distinct_operators = distinct_operators + 1
+            print("Found distinct operator 'uses'")
         if len(runs_operator_list) != 0:
             # print("+1 for each defined command used")
             distinct_operators = distinct_operators + 1
+            print("Found distinct operator 'runs'")
 
+        #TODO: Are "with" and "env" defined properly?
+        # Find developer-defined commands used in .yml file
         name_operand_list = nested_lookup("name", tree)
+        print("Found " + str(len(name_operand_list)) + "unique 'name'.")
         with_operand_list = nested_lookup("with", tree)
+        print("Found " + str(len(with_operand_list)) + "unique 'with'.")
         env_operand_list = nested_lookup("env", tree)
+        print("Found " + str(len(name_operand_list)) + "unique 'env'")
         
         total_operands = len(name_operand_list) + len(with_operand_list) + len(env_operand_list)
 
-        #TODO: Is this boolean working properly??
         if len(name_operand_list) != 0:
             distinct_operands = distinct_operands + 1
+            print("Found distinct operand 'name' ")
         if len(with_operand_list) != 0:
             distinct_operands = distinct_operands + 1
+            print("Found distinct operand 'with'")
         if len(env_operand_list) != 0 :
             distinct_operands = distinct_operands + 1
+            print("Found distinct operand 'env'")
 
+        # Calculate Halstead metrics and add to corresponding lists
         if distinct_operators != 0 and distinct_operands != 0 and total_operators != 0 and total_operands != 0:
             vocab = distinct_operators + distinct_operands
             vocab_list.append(vocab)
@@ -102,6 +145,7 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
             difficulty_list.append(difficulty)
             effort = difficulty * volume
             effort_list.append(effort)
+        # If no operators or operands are present, represent Halstead metrics as not a number
         else:
             vocab_list.append(np.nan)
             length_list.append(np.nan)
@@ -112,6 +156,7 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
         distinct_operators = 0
         distinct_operands = 0
 
+    # Create a dictionary with Halstead metrics for a repository and each .yml file
     halstead_dict["Date"] = date_list
     halstead_dict["File"] = file_list
     halstead_dict["Vocabulary"] = vocab_list
@@ -120,6 +165,7 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     halstead_dict["Difficulty"] = difficulty_list
     halstead_dict["Effort"] = effort_list
 
+    # Create a pandas dataframe from Halstead metrics dictionary
     halstead_data = pd.DataFrame.from_dict(halstead_dict)
     halstead_data.set_index('Date', inplace=True)
         
@@ -330,37 +376,3 @@ def iterate_through_directory(root_directory: str):
         final_dataframe = final_dataframe.append(initial_data)
     
     return final_dataframe
-
-
-def final_score(directory_path, repository_path, score_choices):
-    source_code_dataframe = determine_file_contents(repository_path)
-    yaml_dataframe = generate_abstract_syntax_trees(source_code_dataframe)
-    
-    if "Halstead" in score_choices:
-        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
-        print(halstead_data)
-    if "Complexity" in score_choices:
-        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
-        print(complexity_data)
-    if "RawMetrics" in score_choices:
-        raw_metrics_data = determine_raw_metrics(source_code_dataframe)
-        print(raw_metrics_data)
-    if "Maintainability" in score_choices:
-        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
-        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
-        raw_metrics_data = determine_raw_metrics(source_code_dataframe)
-        combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
-        maintainability_data = calculate_maintainability(combined_data, source_code_dataframe)
-        print(maintainability_data)
-    if "AllMetrics" in score_choices:
-        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
-        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
-        raw_metrics_data = determine_raw_metrics(source_code_dataframe)
-        combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
-        maintainability_data = calculate_maintainability(combined_data, source_code_dataframe)
-        final_dataframe = combine_with_maintainability(combined_data, maintainability_data)
-        print(final_dataframe)
-    if "Multiple" in score_choices:
-        final_data = iterate_through_directory(directory_path)
-        print(final_data)
-
