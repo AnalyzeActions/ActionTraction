@@ -38,6 +38,6 @@ def generate_repository_metrics(directory: str):
 
 
 @app.command()
-def determine_quality(repository_path: str, score_selection: List[str]):
+def determine_quality(directory_path: str, repository_path: str, score_selection: List[str]):
     """Generate a quality score for GitHub Actions files."""
-    quality_score.final_score(repository_path, score_selection)
+    quality_score.final_score(directory_path, repository_path, score_selection)

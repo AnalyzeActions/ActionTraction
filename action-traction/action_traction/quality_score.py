@@ -299,7 +299,40 @@ def combine_with_maintainability(complete_dataframe, maintainability_data):
     return complete_dataframe
 
 
-def final_score(repository_path, score_choices):
+def iterate_through_directory(root_directory: str):
+    """Generate a comprehensive dataframe of metrics for each repository in a specified directory."""
+    repos_to_check = []
+    dataframes_list = []
+    complexity_dataframe = pd.DataFrame()
+    final_dataframe = pd.DataFrame()
+
+    # Generate a list of each subdirectory in the specified root directory
+    for subdir, dirs, files in os.walk(root_directory):
+        repos_to_check.append(dirs)
+    
+    # Iterate through each repository and perform methods to generate quality scores
+    for repository in repos_to_check[0]:
+        path = pathlib.Path.home() / root_directory / repository
+        source_code_dataframe = determine_file_contents(str(path))
+        yaml_dataframe = generate_abstract_syntax_trees(source_code_dataframe)
+        
+        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
+        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
+        raw_metrics_data = determine_raw_metrics(source_code_dataframe)
+        combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
+        maintainability_data = calculate_maintainability(combined_data, source_code_dataframe)
+        complexity_dataframe = combine_with_maintainability(combined_data, maintainability_data)
+        # Add each repository-specific dataframe to a list
+        dataframes_list.append(complexity_dataframe)
+    
+    # Create a comprehensive dataframe with individual repo dataframes
+    for initial_data in dataframes_list:
+        final_dataframe = final_dataframe.append(initial_data)
+    
+    return final_dataframe
+
+
+def final_score(directory_path, repository_path, score_choices):
     source_code_dataframe = determine_file_contents(repository_path)
     yaml_dataframe = generate_abstract_syntax_trees(source_code_dataframe)
     
@@ -327,3 +360,7 @@ def final_score(repository_path, score_choices):
         maintainability_data = calculate_maintainability(combined_data, source_code_dataframe)
         final_dataframe = combine_with_maintainability(combined_data, maintainability_data)
         print(final_dataframe)
+    if "Multiple" in score_choices:
+        final_data = iterate_through_directory(directory_path)
+        print(final_data)
+
