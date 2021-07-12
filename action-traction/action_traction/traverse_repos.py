@@ -55,6 +55,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
 
     # Iterate through list of Actions files for a repository
     for file in files_to_analyze:
+        print(file)
         # Iterate through the commits of a repository where a GitHub Actions file was modified
         for commit in Repository(repository_path, filepath=file).traverse_commits(): 
             # Create a complete path of the GitHub Actions file
@@ -102,22 +103,23 @@ def iterate_entire_repo(repository_path:str):
 
     # Iterate through every commit in a repository
     for commit in Repository(repository_path).traverse_commits():
-        hash_list.append(commit.hash)
-        date_list.append(commit.committer_date)
-        author_list.apppend(commit.author.name)
-        repository_list.append(repository_path)
-        entire_repo_data = pd.DataFrame()
+
         
         # Iterate through modified files in a commit and generate a list of names
-        for mod in commit.modifications():
+        for mod in commit.modified_files:
             files_changed_list.append(mod.filename)
+            hash_list.append(commit.hash)
+            date_list.append(commit.committer_date)
+            author_list.append(commit.author.name)
+            repository_list.append(repository_path)
+            entire_repo_data = pd.DataFrame()
 
         # Create a dictionary with information relating to the entire repository
-        raw_data["Hash"] = hash_list
-        raw_data["Date"] = date_list
-        raw_data["Repository"] = repository_list
-        raw_data["Author"] = author_list
-        raw_data["Files Changed"] = files_changed_list
+    raw_data["Hash"] = hash_list
+    raw_data["Date"] = date_list
+    raw_data["Repository"] = repository_list
+    raw_data["Author"] = author_list
+    raw_data["Files Changed"] = files_changed_list
     
     # Create a pandas dataframe from the raw dictionary
     entire_repo_data = pd.DataFrame.from_dict(raw_data, orient="columns")
@@ -146,7 +148,7 @@ def iterate_through_directory(root_directory: str):
         # Add each repository-specific dataframe to a list
         dataframes_list.append(single_repo_dataframe)
         # Iterate through repositories and generate a dataframe with info from each commit
-        entire_repo_data = iterate_entire_repo(repository)
+        entire_repo_data = iterate_entire_repo(str(path))
         # Create a list of entire repo dataframes
         entire_repo_list.append(entire_repo_data)
 
