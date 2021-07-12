@@ -1,6 +1,6 @@
 from action_traction import download_repos
 from action_traction import traverse_repos
-from action_traction import quality_score
+from action_traction import complexity
 from typing import List
 from pathlib import Path
 import typer
@@ -21,4 +21,4 @@ def generate_repository_metrics(directory: str):
 @app.command()
 def determine_quality(directory_path: str):
     """Generate a quality score for GitHub Actions files."""
-    quality_score.iterate_through_directory(directory_path)
+    complexity.iterate_through_directory(directory_path)
