@@ -21,5 +21,3 @@ def download_https(repository_list: List, path_list: List):
     for x in range(0, len(repository_list)):
         git.Repo.clone_from(repository_list[x], path_list[x])
         count = count + 1
-    
-    # git.Repo.clone_from("https://github.com/gkapfham/meSMSage", "/home/mkapfhammer/Documents/test_traction/meSMSage")
