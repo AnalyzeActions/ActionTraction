@@ -65,7 +65,6 @@ def generate_abstract_syntax_trees(source_code_dataframe):
     source_code_dataframe["Parse Status"] = yaml_list
     yaml_dataframe = source_code_dataframe
     
-    # yaml_dataframe.to_csv(csv_url)
     return yaml_dataframe
 
 def determine_repositories(initial_data):
@@ -96,7 +95,6 @@ def determine_steps_run(yaml_data, repo_file_dict):
             yaml_list = new_data["Parse Status"].tolist()
         
             for parse_tree in yaml_list:
-                # print(file)
                 steps_run = nested_lookup('uses', parse_tree)
                 steps_run_dict["Repository"] = [repo]
                 steps_run_dict["File"] = [file]
@@ -124,7 +122,6 @@ def determine_runs(yaml_data, repo_file_dict):
             yaml_list = new_data["Parse Status"].tolist()
         
             for parse_tree in yaml_list:
-                # print(file)
                 defined_command = nested_lookup('run', parse_tree)
                 runs_dict["Repository"] = [repo]
                 runs_dict["File"] = [file]
@@ -152,7 +149,6 @@ def determine_operating_systems(yaml_data, repo_file_dict):
             yaml_list = new_data["Parse Status"].tolist()
         
             for parse_tree in yaml_list:
-                # print(file)
                 defined_os = nested_lookup('os', parse_tree)
                 operating_systems_dict["Repository"] = [repo]
                 operating_systems_dict["File"] = [file]
@@ -165,7 +161,6 @@ def determine_operating_systems(yaml_data, repo_file_dict):
     for result in dataframe_list:
         operating_systems_dataframe = operating_systems_dataframe.append(result)
 
-    # print(operating_systems_dataframe)
     return operating_systems_dataframe
 
 
@@ -181,7 +176,6 @@ def determine_environments(yaml_data, repo_file_dict):
             yaml_list = new_data["Parse Status"].tolist()
         
             for parse_tree in yaml_list:
-                # print(file)
                 defined_environments = nested_lookup('env', parse_tree)
                 environments_dict["Repository"] = [repo]
                 environments_dict["File"] = [file]
@@ -194,7 +188,6 @@ def determine_environments(yaml_data, repo_file_dict):
     for result in dataframe_list:
         environments_dataframe = environments_dataframe.append(result)
 
-    # print(operating_systems_dataframe)
     return environments_dataframe
 
 
@@ -211,7 +204,6 @@ def determine_languages(yaml_data, repo_file_dict):
             yaml_list = new_data["Parse Status"].tolist()
         
             for parse_tree in yaml_list:
-                # print(file)
                 defined_languages = nested_lookup(regex, parse_tree)
                 print(defined_languages)
                 languages_dict["Repository"] = [repo]
@@ -286,12 +278,6 @@ def perform_specified_analysis(directory, specified_metrics):
         popular_commands = determine_runs_popularity(commands_dataframe)
         print(commands_dataframe)
         print(popular_commands)
-    # if "Comparison" in specified_metrics:
-    #     steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
-    #     commands_dataframe = determine_runs(yaml_daata, repo_file_dict)
-    #     comparison = compare_steps_and_runs(steps_dataframe, commands_dataframe)
-    #     print(comparison)
-    # if "Lifetime" in specified_metrics:
     if "Setup" in specified_metrics:
         operating_systems = determine_operating_systems(yaml_data, repo_file_dict)
         environments = determine_environments(yaml_data, repo_file_dict)
@@ -299,13 +285,3 @@ def perform_specified_analysis(directory, specified_metrics):
         print(operating_systems)
         print(environments)
         print(languages)
-
-
-# Number Nodes/Edges (AST Size)
-# Number jobs / runs
-# Types of jobs / runs (names)
-# Languages
-# Contents of each step
-# How many environment variables (env)
-# Jobs (steps) vs runs
-# Job / Run popularity

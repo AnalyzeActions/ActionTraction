@@ -408,5 +408,3 @@ def perform_specified_summarization(specified_metrics: List[str], directory: str
     if "Messages" in specified_metrics:
         messages_results = calculate_commit_message_metrics(initial_data, repo_file_dict)
         print(messages_results)
-
-    # Pair analyses to .csv file paths
