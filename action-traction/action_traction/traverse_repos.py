@@ -92,11 +92,46 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     return first_dataframe
 
 
+def iterate_entire_repo(repository_path:str):
+    hash_list = []
+    date_list = []
+    author_list = []
+    repository_list = []
+    files_changed_list = []
+    raw_data = {}
+
+    # Iterate through every commit in a repository
+    for commit in Repository(repository_path).traverse_commits():
+        hash_list.append(commit.hash)
+        date_list.append(commit.committer_date)
+        author_list.apppend(commit.author.name)
+        repository_list.append(repository_path)
+        entire_repo_data = pd.DataFrame()
+        
+        # Iterate through modified files in a commit and generate a list of names
+        for mod in commit.modifications():
+            files_changed_list.append(mod.filename)
+
+        # Create a dictionary with information relating to the entire repository
+        raw_data["Hash"] = hash_list
+        raw_data["Date"] = date_list
+        raw_data["Repository"] = repository_list
+        raw_data["Author"] = author_list
+        raw_data["Files Changed"] = files_changed_list
+    
+    # Create a pandas dataframe from the raw dictionary
+    entire_repo_data = pd.DataFrame.from_dict(raw_data, orient="columns")
+
+    return entire_repo_data
+
+
 def iterate_through_directory(root_directory: str):
     """Generate a comprehensive dataframe of metrics for each repository in a specified directory."""
     repos_to_check = []
     dataframes_list = []
+    entire_repo_list = []
     final_dataframe = pd.DataFrame()
+    entire_repo_dataframe = pd.DataFrame()
 
     # Generate a list of each subdirectory in the specified root directory
     for subdir, dirs, files in os.walk(root_directory):
@@ -110,12 +145,22 @@ def iterate_through_directory(root_directory: str):
         single_repo_dataframe = iterate_actions_files(str(path), actions_files)
         # Add each repository-specific dataframe to a list
         dataframes_list.append(single_repo_dataframe)
-    
+        # Iterate through repositories and generate a dataframe with info from each commit
+        entire_repo_data = iterate_entire_repo(repository)
+        # Create a list of entire repo dataframes
+        entire_repo_list.append(entire_repo_data)
+
     # Create a comprehensive dataframe with individual repo dataframes
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
     
+    # Create a comprehensive dataframe with the entire repo dataframes
+    for dataframe in entire_repo_list:
+        entire_repo_dataframe = entire_repo_dataframe.append(dataframe)
+    
     # Put dataframe information into a .csv file
     csv_path = root_directory + "/minedRepos.csv"
+    entire_repo_path = root_directory + "/entireRepo.csv"
     print("Repository Mining Completed")
     final_dataframe.to_csv(csv_path)
+    entire_repo_dataframe.to_csv(entire_repo_path)
