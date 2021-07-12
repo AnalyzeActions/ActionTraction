@@ -244,6 +244,41 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
     return committer_dataframe
 
 
+# TODO: Create functionality for multiple repos in dataset
+def contributors_enitre_repo(entire_repo_data):
+    """Determine the total contributors to a GitHub repository."""
+    author_contributions_list = []
+    percent_contributions = []
+    contribution_dict = {}
+
+
+    # Determine all authors of commits in a repository
+    author_list = entire_repo_data['Author'].tolist()
+    # Determine each unique author for a GitHub repository
+    author_set = set(author_list)
+
+    # Iterate through all unique authors and determine contribution
+    for author in author_set:
+        # Count how many commits an author is associated with in a repo
+        author_contribution = author_list.count(author)
+        # Calculate percentage of contribution based on commits
+        author_percentage_contribution = ((author_contribution) / (len(author_list))) * 100
+
+        author_contributions_list.append(author_contribution)
+        percent_contributions.append(author_percentage_contribution)
+
+        # Create a dictionary for committer summary stats
+        committer_dictionary["Repository"] = [repo]
+        committer_dictionary["File"] = [file]
+        committer_dictionary["Committer"] = [unique_committer]
+        committer_dictionary["Number Corresponding Commits"] = unique_committer_contribution
+        committer_dictionary["Percentage Contribution"] = [committer_percentage_contribution]
+
+        # Create a dataframe from committer summary stats dictionary for each repo
+        initial_dataframe = pd.DataFrame.from_dict(committer_dictionary, orient="columns")
+        dataframe_list.append(initial_dataframe)
+
+
 def calculate_lines_added_metrics(initial_data, repo_file_dict):
     """Determine summary statistics relating to lines added in a GitHub Actions file."""
     added_dictionary = {}
@@ -382,7 +417,8 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
         commit_message_dataframe = commit_message_dataframe.append(result)
 
     return commit_message_dataframe
-            
+
+
 def perform_specified_summarization(specified_metrics: List[str], directory: str):
     csv_path = directory + "/minedRepos.csv"
     initial_data = pd.read_csv(csv_path)
