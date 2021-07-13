@@ -1,3 +1,4 @@
+"""A python program to traverse repositories in a given directory and generate datasets with all relevant information."""
 from pydriller import Repository
 from typing import List
 import pandas as pd
@@ -34,7 +35,6 @@ def determine_actions_files(modified_files: List[str]):
 
 def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     """Mine a repository and find metrics associated with GitHub Actions workflow files."""
-
     # Initalize all necessary lists
     author_list = []
     committer_list = []
