@@ -4,6 +4,7 @@ from action_traction import traverse_repos
 from action_traction import basic_metrics_over_time as basic
 from action_traction import file_contents_analysis as file_contents
 from action_traction import complexity
+from action_traction import overall_summary_stats as summary
 from typing import List
 from pathlib import Path
 import typer
@@ -41,6 +42,11 @@ def contents_analysis(directory_path: str):
     """Understand how the contents of GitHub Actions workflows change over time."""
     dataset = file_contents.contents_over_time(directory_path)
 
+
+@app.command()
+def contributors(directory_path: str):
+    """Determine contributors for a repository and GitHub Actions.""" 
+    summary.determine_contributors(directory_path)
 
 # @app.command()
 # def
