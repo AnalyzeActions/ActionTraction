@@ -180,7 +180,7 @@ def determine_environments(yaml_data, repo_file_dict):
                 environments_dict["Repository"] = [repo]
                 environments_dict["File"] = [file]
                 environments_dict["Environments Used"] = [defined_environments]
-                environments_dict["Amount of Environments Systems"] = [len(defined_environments)]
+                environments_dict["Amount of Environments"] = [len(defined_environments)]
 
                 initial_data = pd.DataFrame.from_dict(environments_dict)
                 dataframe_list.append(initial_data)
@@ -262,11 +262,59 @@ def determine_runs_popularity(runs_dataframe):
     return popular_runs
 
 
+def contents_over_time(directory):
+    complete_dataframe = pd.DataFrame()
+    steps_list = []
+    steps_amount_list = []
+    commands_list = []
+    commands_amount_list = []
+    os_list = []
+    os_amount_list = []
+    env_list = []
+    env_amount_list = []
+
+    source_code_data = iterate_through_directory(directory)
+    repo_set = determine_repositories(source_code_data)
+    repo_file_dict = determine_files_per_repo(source_code_data, repo_set)
+    yaml_data = generate_abstract_syntax_trees(source_code_data)
+        
+    steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
+    commands_dataframe = determine_runs(yaml_data, repo_file_dict)
+    operating_systems = determine_operating_systems(yaml_data, repo_file_dict)
+    environments = determine_environments(yaml_data, repo_file_dict)
+    # languages = determine_languages(yaml_data, repo_file_dict) # Regular expression not currently working
+
+    complete_dataframe = steps_dataframe
+    steps_list = steps_dataframe["Step Name"].tolist()
+    step_amount_list = steps_dataframe["Amount of Steps"].tolist()
+    commands_list = commands_dataframe["Run Command"].tolist()
+    commands_amount_list = commands_dataframe["Amount of Defined Commands"].tolist()
+    os_list = operating_systems["Operating Systems Used"].tolist()
+    os_amount_list = operating_systems["Amount of Operating Systems"].tolist()
+    env_list = environments["Environments Used"].tolist()
+    env_amount_list = environments["Amount of Environments"]
+
+    complete_dataframe["Existing Actions"] = steps_list
+    complete_dataframe["Amount Existing Actions"] = step_amount_list
+    complete_dataframe["Defined Commands"] = commands_list
+    complete_dataframe["Amount Defined Commands"] = commands_amount_list
+    complete_dataframe["OS"] = os_list
+    complete_dataframe["Amount OS"] = os_amount_list
+    complete_dataframe["Environments"] = env_list
+    complete_dataframe["Amount Environments"] = env_amount_list
+
+    complete_dataframe_path = directory + "/fileContentsAnalysis.csv"
+    complete_dataframe.to_csv(complete_dataframe_path)
+    return complete_dataframe
+
+
 def perform_specified_analysis(directory, specified_metrics):
     source_code_data = iterate_through_directory(directory)
     repo_set = determine_repositories(source_code_data)
     repo_file_dict = determine_files_per_repo(source_code_data, repo_set)
     yaml_data = generate_abstract_syntax_trees(source_code_data)
+
+
 
     if "Actions" in specified_metrics:
         steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
