@@ -21,7 +21,7 @@ def size_over_time(initial_data, repository_set):
     for repo in repository_set:
         new_data = initial_data.loc[initial_data['Repository'] == repo]
         # Remove unnecessary columns from dataframe
-        new_data.drop(["Author", "Committer", "Branches", "Commit Message", "Lines Added", "Lines Removed", "Date of Change"], axis=1)
+        new_data.drop(new_data.columns[[0, 5, 6, 7, 8, 9,10, 11]], axis=1, inplace=True)
         dataframe_list.append(new_data)
 
     # Create comprehensive dataframe with size over every commit
@@ -40,7 +40,7 @@ def lines_added_over_time(initial_data, repository_set):
     for repo in repository_set:
         new_data = initial_data.loc[initial_data['Repository'] == repo]
         # Remove unnecessary columns from dataframe
-        new_data.drop(["File Size in Bytes", "Author", "Branches", "Commit Message", "Committer", "Lines Removed", "Date of Change"], axis=1)
+        new_data.drop(new_data.columns[[0, 4, 5, 6, 7, 8, 10, 11]], axis=1, inplace=True)
         dataframe_list.append(new_data)
 
     # Create comprehensive dataframe with lines added over every commit
@@ -59,7 +59,7 @@ def lines_removed_over_time(initial_data, repository_set):
     for repo in repository_set:
         new_data = initial_data.loc[initial_data['Repository'] == repo]
         # Remove unnecessary columns from dataframe
-        new_data.drop(["File Size in Bytes", "Author", "Branches", "Commit Message", "Committer", "Lines Removed", "Date of Change"], axis=1)
+        new_data.drop(new_data.columns[[0, 4, 5, 6, 7, 8, 9, 11]], axis=1, inplace=True)        
         dataframe_list.append(new_data)
 
     # Create comprehensive dataframe with lines removed over every commit
@@ -87,4 +87,5 @@ def combine_dataframes(directory):
 
     final_dataset_path = directory + "/diffs.csv"
     final_dataset.to_csv(final_dataset_path)
+    print(final_dataset)
     return final_dataset 
