@@ -70,6 +70,22 @@ def lines_removed_over_time(initial_data, repository_set):
     return removed_data
 
 
+def combine_dataframes(directory):
+    initial_data_path = directory + "/minedRepos.csv"
+    initial_data = pd.read_csv(initial_data_path)
+    repository_set = determine_repositories(initial_data)
+    final_dataset = pd.DataFrame()
+    size_data = size_over_time(initial_data, repository_set)
+    added_data = lines_added_over_time(initial_data, repository_set)
+    removed_data = lines_removed_over_time(initial_data, repository_set)
 
+    lines_added_list = added_data["Lines Added"].tolist()
+    lines_removed_list = removed_data["Lines Removed"].tolist()
 
+    final_dataset = size_data
+    final_dataset["Lines Added"] = lines_added_list
+    final_dataset["Lines Removed"] = lines_removed_list
 
+    final_dataset_path = directory + "/diffs.csv"
+    final_dataset.to_csv(final_dataset_path)
+    return final_dataset 
