@@ -305,7 +305,7 @@ def contributors_enitre_repo(directory, entire_repo_data, repo_file_dict):
 
     for data in dataframe_list:
         contribution_data = contribution_data.append(data)
-    
+
     return contribution_data
 
 
