@@ -1,8 +1,9 @@
-from typing import List 
+from typing import List
 from pathlib import Path
 import pathlib
 import os
 import git
+
 
 def generate_save_path(repository_list: List, save_path: Path):
     final_repository_paths = []
@@ -10,7 +11,7 @@ def generate_save_path(repository_list: List, save_path: Path):
         repo_name = os.path.splitext(os.path.basename(repo))[0]
         path = pathlib.Path.home() / save_path / repo_name
         final_repository_paths.append(str(path))
-    
+
     # print(final_repository_paths)
     return final_repository_paths
 
