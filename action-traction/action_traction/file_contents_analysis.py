@@ -87,7 +87,6 @@ def determine_files_per_repo(initial_data, repository_set):
 
 def determine_steps_run(yaml_data, repo_file_dict):
     yaml_list = []
-    steps_list = []
     steps_run_dict = {}
     dataframe_list = []
     steps_dataframe = pd.DataFrame()
@@ -114,7 +113,6 @@ def determine_steps_run(yaml_data, repo_file_dict):
 
 def determine_runs(yaml_data, repo_file_dict):
     yaml_list = []
-    runs_list = []
     runs_dict = {}
     dataframe_list = []
     runs_dataframe = pd.DataFrame()
@@ -141,7 +139,6 @@ def determine_runs(yaml_data, repo_file_dict):
 
 def determine_operating_systems(yaml_data, repo_file_dict):
     yaml_list = []
-    operating_systems_list = []
     operating_systems_dict = {}
     dataframe_list = []
     operating_systems_dataframe = pd.DataFrame()
@@ -170,7 +167,6 @@ def determine_operating_systems(yaml_data, repo_file_dict):
 
 def determine_environments(yaml_data, repo_file_dict):
     yaml_list = []
-    environments_list = []
     environments_dict = {}
     dataframe_list = []
     environments_dataframe = pd.DataFrame()
@@ -199,7 +195,6 @@ def determine_environments(yaml_data, repo_file_dict):
 
 def determine_languages(yaml_data, repo_file_dict):
     yaml_list = []
-    languages_list = []
     languages_dict = {}
     dataframe_list = []
     regex = re.compile(r"\w+(?:-version)")
@@ -214,8 +209,8 @@ def determine_languages(yaml_data, repo_file_dict):
                 print(defined_languages)
                 languages_dict["Repository"] = [repo]
                 languages_dict["File"] = [file]
-                languages_dict["Environments Used"] = [defined_languages]
-                languages_dict["Amount of Environments Systems"] = [
+                languages_dict["Languages Used"] = [defined_languages]
+                languages_dict["Amount of Languages"] = [
                     len(defined_languages)
                 ]
 
@@ -233,9 +228,6 @@ def popularity_helper(specified_data, identifier):
     all_metrics = []
     repo_count = 0
     popularity_dict = {}
-    metric_names = []
-    amount_repos = []
-    percentage_list = []
     # Generate set of repositories
     total_repositories = specified_data["Repository"].tolist()
     individual_repos = set(total_repositories)
@@ -252,7 +244,6 @@ def popularity_helper(specified_data, identifier):
         for metric in repo_set:
             all_metrics.append(metric)
 
-    final_set = set(all_metrics)
     for individual_metric in all_metrics:
         popularity_dict[individual_metric] = all_metrics.count(individual_metric)
 
@@ -272,7 +263,6 @@ def determine_runs_popularity(runs_dataframe):
 def contents_over_time(directory):
     complete_dataframe = pd.DataFrame()
     steps_list = []
-    steps_amount_list = []
     commands_list = []
     commands_amount_list = []
     os_list = []
