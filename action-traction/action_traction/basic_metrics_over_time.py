@@ -1,6 +1,7 @@
 """A python program to determine basic metrics of GitHub Actions configuration over time."""
 import pandas as pd
 
+
 def determine_repositories(initial_data):
     """Find each repository in the complete dataset of repository information."""
     # Create a list of all repositories

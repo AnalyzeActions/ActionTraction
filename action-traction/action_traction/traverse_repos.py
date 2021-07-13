@@ -92,6 +92,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
 
 
 def iterate_entire_repo(repository_path: str):
+    """Iterate through an entire repository and generate a complete dataframe of relevant metrics."""
     hash_list = []
     date_list = []
     author_list = []

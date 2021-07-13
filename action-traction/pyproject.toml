@@ -21,6 +21,8 @@ nested-lookup = "^0.2.22"
 matplotlib = "^3.4.2"
 flake8 = "^3.9.2"
 pydocstyle = "^6.1.1"
+pylint = "^2.9.3"
+black = "^21.6b0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

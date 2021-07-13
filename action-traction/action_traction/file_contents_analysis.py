@@ -33,10 +33,10 @@ def determine_file_contents(repository_path: str):
                 source_code_dict["Date of Commit"] = commit.committer_date
                 code_dataframe = pd.DataFrame.from_dict(source_code_dict)
                 dataframe_list.append(code_dataframe)
-    
+
     for result in dataframe_list:
         source_code_dataframe = source_code_dataframe.append(result)
-    
+
     return source_code_dataframe
 
 
@@ -230,9 +230,7 @@ def determine_languages(yaml_data, repo_file_dict):
                 languages_dict["Repository"] = [repo]
                 languages_dict["File"] = [file]
                 languages_dict["Languages Used"] = [defined_languages]
-                languages_dict["Amount of Languages"] = [
-                    len(defined_languages)
-                ]
+                languages_dict["Amount of Languages"] = [len(defined_languages)]
 
                 initial_data = pd.DataFrame.from_dict(languages_dict)
                 dataframe_list.append(initial_data)
