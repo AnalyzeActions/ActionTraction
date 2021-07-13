@@ -108,7 +108,6 @@ def calculate_size_metrics(initial_data, repo_file_dict):
     minimum = 0
     maximum = 0
     size_dictionary = {}
-    final_dict = {}
     dataframe_list = []
     size_dataframe = pd.DataFrame()
 
@@ -152,7 +151,6 @@ def calculate_size_metrics(initial_data, repo_file_dict):
 def calculate_author_metrics(initial_data, repo_file_dict):
     """Determine summary statistics relating to authors of GitHub Actions files."""
     author_dictionary = {}
-    count_unique_authors = 0
     dataframe_list = []
     author_dataframe = pd.DataFrame()
 
@@ -207,7 +205,6 @@ def calculate_author_metrics(initial_data, repo_file_dict):
 def calculate_committer_metrics(initial_data, repo_file_dict):
     """Determine summary statistics relating to committers of GitHub Actions files."""
     committer_dictionary = {}
-    count_unique_committer = 0
     dataframe_list = []
     committer_dataframe = pd.DataFrame()
 
@@ -459,6 +456,8 @@ def determine_contributors(directory: str):
 
     author_results = calculate_author_metrics(initial_data, repo_file_dict)
     committer_results = calculate_committer_metrics(initial_data, repo_file_dict)
+
+    return author_results, committer_results
 
 
 def perform_specified_summarization(specified_metrics: List[str], directory: str):
