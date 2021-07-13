@@ -1,6 +1,7 @@
 from action_traction import download_repos
 from action_traction import traverse_repos
 from action_traction import basic_metrics_over_time as basic
+from action_traction import file_contents_analysis as file_contents
 from action_traction import complexity
 from typing import List
 from pathlib import Path
@@ -28,3 +29,11 @@ def determine_diffs(directory:str):
 def determine_quality(directory_path: str):
     """Generate a quality score for GitHub Actions files."""
     complexity.iterate_through_directory(directory_path)
+
+@app.command()
+def contents_analysis(directory_path: str):
+    """Understand how the contents of GitHub Actions workflows change over time."""
+    dataset = file_contents.contents_over_time(directory_path)
+
+# @app.command()
+# def 
