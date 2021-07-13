@@ -288,6 +288,8 @@ def contributors_enitre_repo(directory, entire_repo_data, repo_file_dict):
     
     for data in dataframe_list:
         contribution_data = contribution_data.append(data)
+    
+    return contribution_data
 
 
 def calculate_lines_added_metrics(initial_data, repo_file_dict):
@@ -431,8 +433,14 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
 
 
 def determine_contributors(directory: str):
+    csv_path = directory + "/minedRepos.csv"
+    initial_data = pd.read_csv(csv_path)
+    repository_set = determine_repositories(initial_data)
+    repo_file_dict = determine_files_per_repo(initial_data, repository_set)
+
     author_results = calculate_author_metrics(initial_data, repo_file_dict)
     committer_results = calculate_committer_metrics(initial_data, repo_file_dict)
+
 
 def perform_specified_summarization(specified_metrics: List[str], directory: str):
     csv_path = directory + "/minedRepos.csv"
