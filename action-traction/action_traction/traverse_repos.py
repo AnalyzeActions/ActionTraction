@@ -1,7 +1,6 @@
 from pydriller import Repository
 from typing import List
 import pandas as pd
-import numpy as np
 import os
 import pathlib
 
@@ -42,10 +41,8 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     date_list = []
     branches_list = []
     commit_messages_list = []
-    files_changed_list = []
     lines_added_list = []
     lines_deleted_list = []
-    source_code_list = []
     file_list = []
     repository_list = []
     size_bytes_list = []
@@ -132,9 +129,7 @@ def combine_rows_whole_repo(entire_repo_data):
     hash_list = entire_repo_data["Hash"].tolist()
     hash_set = set(hash_list)
     hash_dict = {}
-    dictionary_list = []
     complete_dataframe = pd.DataFrame()
-    hash_data = pd.DataFrame()
 
     # Iterate through commit hashes and create new datasets for each
     for commit_hash in hash_set:
