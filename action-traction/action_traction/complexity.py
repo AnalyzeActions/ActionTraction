@@ -1,3 +1,4 @@
+"""A python program to determine complexity of a GitHub Actions workflow."""
 from pydriller import Repository
 from nested_lookup import nested_lookup
 import numpy as np
@@ -340,7 +341,6 @@ def determine_raw_metrics(source_code_dataframe):
 
 def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
     """Combine dataframes associated to Halstead metrics, Cyclomatic Complexity, and raw metrics."""
-
     # Create lists for all necessary metrics
     cyclomatic_complexity = complexity_data["Cyclomatic Complexity Score"].tolist()
     volume = halstead_data["Volume"].tolist()
@@ -442,7 +442,6 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
 
 def combine_with_maintainability(complete_dataframe, maintainability_data):
     """Create a final complete dataframe with all complexity measures."""
-
     # Put maintainability indexes in a list
     original = maintainability_data["Original Maintainability Index"].tolist()
     sei = maintainability_data["SEI Maintainability Index"].tolist()
