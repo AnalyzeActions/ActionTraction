@@ -245,38 +245,49 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
 
 
 # TODO: Create functionality for multiple repos in dataset
-def contributors_enitre_repo(entire_repo_data):
+def contributors_enitre_repo(directory, entire_repo_data, repo_file_dict):
     """Determine the total contributors to a GitHub repository."""
     author_contributions_list = []
     percent_contributions = []
-    contribution_dict = {}
+    contribution_data = pd.DataFrame()
+    committer_dictionary = {}
+    repository_list = []
+    all_authors = []
+    dataframe_list = []
 
+    for repo, file_list in repo_file_dict.items():
+        new_data = entire_repo_data.loc[entire_repo_data['Repository'] == repo]
 
-    # Determine all authors of commits in a repository
-    author_list = entire_repo_data['Author'].tolist()
-    # Determine each unique author for a GitHub repository
-    author_set = set(author_list)
+        # Determine all authors of commits in a repository
+        author_list = new_data['Author'].tolist()
+        # Determine each unique author for a GitHub repository
+        author_set = set(author_list)
 
-    # Iterate through all unique authors and determine contribution
-    for author in author_set:
-        # Count how many commits an author is associated with in a repo
-        author_contribution = author_list.count(author)
-        # Calculate percentage of contribution based on commits
-        author_percentage_contribution = ((author_contribution) / (len(author_list))) * 100
+        # Iterate through all unique authors and determine contribution
+        for author in author_set:
+            # Count how many commits an author is associated with in a repo
+            author_contribution = author_list.count(author)
+            # Calculate percentage of contribution based on commits
+            author_percentage_contribution = ((author_contribution) / (len(author_list))) * 100
 
-        author_contributions_list.append(author_contribution)
-        percent_contributions.append(author_percentage_contribution)
+            author_contributions_list.append(author_contribution)
+            percent_contributions.append(author_percentage_contribution)
+            
+            repository_list.append(repo)
+            all_authors.append(author)
 
-        # Create a dictionary for committer summary stats
-        committer_dictionary["Repository"] = [repo]
-        committer_dictionary["File"] = [file]
-        committer_dictionary["Committer"] = [unique_committer]
-        committer_dictionary["Number Corresponding Commits"] = unique_committer_contribution
-        committer_dictionary["Percentage Contribution"] = [committer_percentage_contribution]
+            # Create a dictionary for committer summary stats
+        committer_dictionary["Repository"] = repository_list
+        committer_dictionary["Committer"] = [author]
+        committer_dictionary["Number Corresponding Commits"] = author_contributions_list
+        committer_dictionary["Percentage Contribution"] = percent_contributions
 
         # Create a dataframe from committer summary stats dictionary for each repo
         initial_dataframe = pd.DataFrame.from_dict(committer_dictionary, orient="columns")
         dataframe_list.append(initial_dataframe)
+    
+    for data in dataframe_list:
+        contribution_data = contribution_data.append(data)
 
 
 def calculate_lines_added_metrics(initial_data, repo_file_dict):
@@ -418,6 +429,10 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
 
     return commit_message_dataframe
 
+
+def determine_contributors(directory: str):
+    author_results = calculate_author_metrics(initial_data, repo_file_dict)
+    committer_results = calculate_committer_metrics(initial_data, repo_file_dict)
 
 def perform_specified_summarization(specified_metrics: List[str], directory: str):
     csv_path = directory + "/minedRepos.csv"
