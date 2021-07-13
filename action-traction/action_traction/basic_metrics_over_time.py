@@ -1,6 +1,4 @@
-from typing import List
 import pandas as pd
-import datetime
 
 
 def determine_repositories(initial_data):
