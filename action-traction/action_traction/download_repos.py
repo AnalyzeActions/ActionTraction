@@ -1,3 +1,4 @@
+"""A python program to download repositories from GitHub URLs."""
 from typing import List
 from pathlib import Path
 import pathlib
@@ -6,6 +7,7 @@ import git
 
 
 def generate_save_path(repository_list: List, save_path: Path):
+    """Generate each path that a repo should be saved to based on its name."""
     final_repository_paths = []
     for repo in repository_list:
         repo_name = os.path.splitext(os.path.basename(repo))[0]
@@ -17,6 +19,7 @@ def generate_save_path(repository_list: List, save_path: Path):
 
 
 def download_https(repository_list: List, path_list: List):
+    """Download repositories using https URLs."""
     count = 0
     # Clone a remote repository using https
     for x in range(0, len(repository_list)):
