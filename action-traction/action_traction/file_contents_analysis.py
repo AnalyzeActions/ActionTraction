@@ -1,3 +1,4 @@
+"""A program to determine the contents of GitHub Actions configuration files over time."""
 from pydriller import Repository
 from nested_lookup import nested_lookup
 import os
@@ -8,50 +9,62 @@ import re
 
 
 def determine_file_contents(repository_path: str):
+    """Traverse a GitHub Repository and gather source code."""
     actions_files = []
     source_code_dict = {}
     dataframe_list = []
     file_name_list = []
     repository_path_list = []
     source_code_dataframe = pd.DataFrame()
+
+    # Iterate through repository commits
     for commit in Repository(repository_path).traverse_commits():
         for modification in commit.modified_files:
+            # Only gather information for GitHub Actions configurations
             if ".github" in str(modification.new_path):
                 actions_files.append(modification.source_code)
                 file_name_list.append(modification.new_path)
                 repository_path_list.append(repository_path)
 
+                # Create a dictionary of all repo information and its source code
                 source_code_dict["Repository"] = [repository_path]
                 source_code_dict["File"] = [modification.new_path]
                 source_code_dict["Source Code"] = modification.source_code
                 source_code_dict["Date of Commit"] = commit.committer_date
                 code_dataframe = pd.DataFrame.from_dict(source_code_dict)
                 dataframe_list.append(code_dataframe)
+    
     for result in dataframe_list:
         source_code_dataframe = source_code_dataframe.append(result)
+    
     return source_code_dataframe
 
 
 def iterate_through_directory(root_directory: str):
+    """Iterate through a directory and determine the repositories that are in it."""
     repos_to_check = []
     dataframes_list = []
     final_dataframe = pd.DataFrame()
+
+    # Iterate through directory and determine repositories
     for subdir, dirs, files in os.walk(root_directory):
         repos_to_check.append(dirs)
 
     for repository in repos_to_check[0]:
+        # Create complete paths for each repository
         path = pathlib.Path.home() / root_directory / repository
+        # Create a dataframe for each repository in a directory
         source_code_dataframe = determine_file_contents(str(path))
         dataframes_list.append(source_code_dataframe)
 
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
 
-    print(final_dataframe)
     return final_dataframe
 
 
 def generate_abstract_syntax_trees(source_code_dataframe):
+    """Generate the abstract syntax trees of GitHub Actions configurations source code."""
     yaml_list = []
     source_code_list = source_code_dataframe["Source Code"].tolist()
     for source_code in source_code_list:
@@ -70,12 +83,14 @@ def generate_abstract_syntax_trees(source_code_dataframe):
 
 
 def determine_repositories(initial_data):
+    """Create a set of the unique repositories in a dataframe."""
     repository_list = initial_data["Repository"].tolist()
     repository_set = set(repository_list)
     return repository_set
 
 
 def determine_files_per_repo(initial_data, repository_set):
+    """Determine the GitHub Actions files for each repository."""
     repo_file_dict = {}
     for repository in repository_set:
         new_data = initial_data.loc[initial_data["Repository"] == repository]
@@ -86,6 +101,7 @@ def determine_files_per_repo(initial_data, repository_set):
 
 
 def determine_steps_run(yaml_data, repo_file_dict):
+    """Determine the defined GitHub Actions used in a configuration file."""
     yaml_list = []
     steps_run_dict = {}
     dataframe_list = []
@@ -112,6 +128,7 @@ def determine_steps_run(yaml_data, repo_file_dict):
 
 
 def determine_runs(yaml_data, repo_file_dict):
+    """Determine the specified commands run in a GitHub Actions configuration file."""
     yaml_list = []
     runs_dict = {}
     dataframe_list = []
@@ -138,6 +155,7 @@ def determine_runs(yaml_data, repo_file_dict):
 
 
 def determine_operating_systems(yaml_data, repo_file_dict):
+    """Determine operating systems used in a GitHub Action configuration file."""
     yaml_list = []
     operating_systems_dict = {}
     dataframe_list = []
@@ -166,6 +184,7 @@ def determine_operating_systems(yaml_data, repo_file_dict):
 
 
 def determine_environments(yaml_data, repo_file_dict):
+    """Determine the environments used in a GitHub Action configuration file."""
     yaml_list = []
     environments_dict = {}
     dataframe_list = []
@@ -194,6 +213,7 @@ def determine_environments(yaml_data, repo_file_dict):
 
 
 def determine_languages(yaml_data, repo_file_dict):
+    """Determine the programming languages used in a GitHub Action configuration file."""
     yaml_list = []
     languages_dict = {}
     dataframe_list = []
@@ -224,6 +244,7 @@ def determine_languages(yaml_data, repo_file_dict):
 
 
 def popularity_helper(specified_data, identifier):
+    """Determine the popularity of a specific metric."""
     repo_metrics = []
     all_metrics = []
     repo_count = 0
@@ -251,16 +272,19 @@ def popularity_helper(specified_data, identifier):
 
 
 def determine_steps_popularity(steps_dataframe):
+    """Determine popularity of defined GitHub Actions."""
     popular_steps = popularity_helper(steps_dataframe, "Step Name")
     return popular_steps
 
 
 def determine_runs_popularity(runs_dataframe):
+    """Determine popularity of specified commands."""
     popular_runs = popularity_helper(runs_dataframe, "Run Command")
     return popular_runs
 
 
 def contents_over_time(directory):
+    """Determine the contents of a GitHub Action configuration file over time."""
     complete_dataframe = pd.DataFrame()
     steps_list = []
     commands_list = []
@@ -306,6 +330,7 @@ def contents_over_time(directory):
 
 
 def perform_specified_analysis(directory, specified_metrics):
+    """Perform specified analysis based on user definition."""
     source_code_data = iterate_through_directory(directory)
     repo_set = determine_repositories(source_code_data)
     repo_file_dict = determine_files_per_repo(source_code_data, repo_set)
