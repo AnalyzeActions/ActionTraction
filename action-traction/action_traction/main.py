@@ -19,7 +19,7 @@ def generate_repository_metrics(directory: str):
     """Generate a .csv file for all given repositories."""
     traverse_repos.iterate_through_directory(directory)
 
-app.command()
+@app.command()
 def determine_diffs(directory:str):
     """Generate a understanding of the diffs of a GitHub Actions workflow."""
     final_dataset = basic.combine_dataframes(directory)

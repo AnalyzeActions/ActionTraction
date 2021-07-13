@@ -1,4 +1,3 @@
-from pydriller import RepositoryMining
 from typing import List
 import pandas as pd
 import datetime
