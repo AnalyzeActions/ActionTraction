@@ -55,7 +55,6 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
 
     # Iterate through list of Actions files for a repository
     for file in files_to_analyze:
-        print(file)
         # Iterate through the commits of a repository where a GitHub Actions file was modified
         for commit in Repository(repository_path, filepath=file).traverse_commits(): 
             # Create a complete path of the GitHub Actions file
@@ -127,6 +126,47 @@ def iterate_entire_repo(repository_path:str):
     return entire_repo_data
 
 
+def combine_rows_whole_repo(entire_repo_data):
+    """Combine rows with the same hash in the entire repository dataframe."""
+    hash_list = entire_repo_data["Hash"].tolist()
+    hash_set = set(hash_list)
+    hash_dict = {}
+    dictionary_list = []
+    complete_dataframe = pd.DataFrame()
+    hash_data = pd.DataFrame()
+
+    # Iterate through commit hashes and create new datasets for each
+    for commit_hash in hash_set:
+        new_data = entire_repo_data.loc[entire_repo_data['Hash'] == commit_hash]
+        modified_files = new_data["Files Changed"].tolist()
+
+        repositories_list = new_data["Repository"].tolist()
+        repo_name = repositories_list[0]
+
+        hash_dict[(commit_hash, repo_name)] = modified_files
+
+        complete_dataframe = pd.DataFrame.from_dict(hash_dict)
+    
+    print(complete_dataframe)
+        # repositories_list = new_data["Repository"].tolist()
+        # repo_name = repositories_list[0]
+
+        # hash_dict["Hash"] = [commit_hash]
+        # hash_dict["Repository"] = [repo_name]
+        # hash_dict["Modified Files"] = modified_files
+
+        # hash_data = pd.DataFrame.from_dict(hash_dict)
+
+        # dictionary_list.append(hash_data)
+    
+    # for dictionary in dictionary_list:
+    #     complete_dictionary = complete_dictionary.append(dictionary)
+
+
+    # print(complete_dictionary)
+
+
+
 def iterate_through_directory(root_directory: str):
     """Generate a comprehensive dataframe of metrics for each repository in a specified directory."""
     repos_to_check = []
@@ -166,3 +206,5 @@ def iterate_through_directory(root_directory: str):
     print("Repository Mining Completed")
     final_dataframe.to_csv(csv_path)
     entire_repo_dataframe.to_csv(entire_repo_path)
+    
+    combine_rows_whole_repo(entire_repo_dataframe)
