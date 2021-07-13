@@ -19,6 +19,7 @@ statistics = "^1.0.3"
 PyYAML = "^5.4.1"
 nested-lookup = "^0.2.22"
 matplotlib = "^3.4.2"
+flake8 = "^3.9.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -27,3 +28,14 @@ taskipy = "^1.8.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.taskipy.tasks]
+black = { cmd = "black action_traction tests --check", help = "Run the black checks for source code format" }
+flake8 = { cmd = "flake8 action_traction tests", help = "Run the flake8 checks for source code documentation" }
+mypy = { cmd = "poetry run mypy action_traction", help = "Run the mypy type checker for potential type errors" }
+pydocstyle = { cmd = "pydocstyle action_traction tests", help = "Run the pydocstyle checks for source code documentation" }
+pylint = { cmd = "pylint action_traction tests", help = "Run the pylint checks for source code documentation" }
+test = { cmd = "pytest -x -s", help = "Run the pytest test suite" }
+all = "task black && task flake8 && task pydocstyle && task pylint && task mypy && task test && task coverage"
+lint = "task black && task flake8 && task pydocstyle && task pylint"
+tests = "task test && task coverage"
