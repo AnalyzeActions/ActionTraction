@@ -1,12 +1,13 @@
+"""A python program to determine complexity of a GitHub Actions workflow."""
 from pydriller import Repository
 from nested_lookup import nested_lookup
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import yaml
 import math
 import pathlib
 import os
+
 
 def determine_file_contents(repository_path: str):
     """Determine the GitHub Actions files in a given repository."""
@@ -37,11 +38,11 @@ def determine_file_contents(repository_path: str):
                 # Create a dataframe from the existing source code dictionary
                 code_dataframe = pd.DataFrame.from_dict(source_code_dict)
                 dataframe_list.append(code_dataframe)
-    
+
     # Create a dataframe for entire repo and every file with source code
     for result in dataframe_list:
         source_code_dataframe = source_code_dataframe.append(result)
-    
+
     return source_code_dataframe
 
 
@@ -63,7 +64,7 @@ def generate_abstract_syntax_trees(source_code_dataframe):
         # If unparseable, the file does not have any contents
         else:
             yaml_list.append("No file contents")
-    
+
     source_code_dataframe["Parse Status"] = yaml_list
 
     # Generate a dataframe with source code abstract syntax trees
@@ -82,7 +83,6 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     volume_list = []
     difficulty_list = []
     effort_list = []
-    halstead_dataframe = pd.DataFrame()
 
     # Generate a list of source code abstract syntax trees
     abstract_trees_list = yaml_dataframe["Parse Status"].tolist()
@@ -100,9 +100,13 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
         print("Found " + str(len(uses_operator_list)) + " unique GitHub Actions used.")
         # Find user defined commands used in .yml file
         runs_operator_list = nested_lookup("run", tree)
-        print("Found " + str(len(runs_operator_list)) + " unique developer-specified commands used.")
+        print(
+            "Found "
+            + str(len(runs_operator_list))
+            + " unique developer-specified commands used."
+        )
 
-        # Calculate the total amount of operators 
+        # Calculate the total amount of operators
         total_operators = len(uses_operator_list) + len(runs_operator_list)
 
         # Determine distinct operators
@@ -115,7 +119,7 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
             distinct_operators = distinct_operators + 1
             print("Found distinct operator 'runs'")
 
-        #TODO: Are "with" and "env" defined properly?
+        # TODO: Are "with" and "env" defined properly?
         # Find developer-defined commands used in .yml file
         name_operand_list = nested_lookup("name", tree)
         print("Found " + str(len(name_operand_list)) + " unique 'name'.")
@@ -123,8 +127,10 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
         print("Found " + str(len(with_operand_list)) + " unique 'with'.")
         env_operand_list = nested_lookup("env", tree)
         print("Found " + str(len(name_operand_list)) + " unique 'env'")
-        
-        total_operands = len(name_operand_list) + len(with_operand_list) + len(env_operand_list)
+
+        total_operands = (
+            len(name_operand_list) + len(with_operand_list) + len(env_operand_list)
+        )
 
         if len(name_operand_list) != 0:
             distinct_operands = distinct_operands + 1
@@ -132,12 +138,17 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
         if len(with_operand_list) != 0:
             distinct_operands = distinct_operands + 1
             print("Found distinct operand 'with'")
-        if len(env_operand_list) != 0 :
+        if len(env_operand_list) != 0:
             distinct_operands = distinct_operands + 1
             print("Found distinct operand 'env'")
 
         # Calculate Halstead metrics and add to corresponding lists
-        if distinct_operators != 0 and distinct_operands != 0 and total_operators != 0 and total_operands != 0:
+        if (
+            distinct_operators != 0
+            and distinct_operands != 0
+            and total_operators != 0
+            and total_operands != 0
+        ):
             vocab = distinct_operators + distinct_operands
             vocab_list.append(vocab)
             length = total_operators + total_operands
@@ -171,8 +182,8 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
 
     # Create a pandas dataframe from Halstead metrics dictionary
     halstead_data = pd.DataFrame.from_dict(halstead_dict)
-    halstead_data.set_index('Date', inplace=True)
-        
+    halstead_data.set_index("Date", inplace=True)
+
     # plot = halstead_data.plot()
     # figure = plot.get_figure()
 
@@ -206,18 +217,49 @@ def determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe):
 
         # TODO: Are with and envs correct here?
         if_complexity = len(if_amount)
-        print("Found " + str(if_complexity) + " if statements, increasing complexity by " + str(if_complexity))
+        print(
+            "Found "
+            + str(if_complexity)
+            + " if statements, increasing complexity by "
+            + str(if_complexity)
+        )
         elif_complexity = len(elif_amount)
-        print("Found " + str(elif_complexity) + " elif statements, increasing complexity by " + str(elif_complexity))
+        print(
+            "Found "
+            + str(elif_complexity)
+            + " elif statements, increasing complexity by "
+            + str(elif_complexity)
+        )
         matrix_complexity = len(matrix_amount)
-        print("Found " + str(matrix_complexity) + " matrices, increasing complexity by " + str(matrix_complexity))
+        print(
+            "Found "
+            + str(matrix_complexity)
+            + " matrices, increasing complexity by "
+            + str(matrix_complexity)
+        )
         with_complexity = len(with_amount)
-        print("Found " + str(with_complexity) + " with statements, increasing complexity by " + str(with_complexity))
+        print(
+            "Found "
+            + str(with_complexity)
+            + " with statements, increasing complexity by "
+            + str(with_complexity)
+        )
         env_complexity = len(env_amount)
-        print("Found " + str(env_complexity) + " environments, increasing complexity by " + str(env_complexity))
+        print(
+            "Found "
+            + str(env_complexity)
+            + " environments, increasing complexity by "
+            + str(env_complexity)
+        )
 
         # Calculate total cyclomatic complexity for a GitHub Actions file
-        total_complexity = if_complexity + elif_complexity + matrix_complexity + with_complexity + env_complexity
+        total_complexity = (
+            if_complexity
+            + elif_complexity
+            + matrix_complexity
+            + with_complexity
+            + env_complexity
+        )
         total_complexity_list.append(total_complexity)
 
     # Create a dictionary with cyclomatic complexity
@@ -244,14 +286,14 @@ def determine_raw_metrics(source_code_dataframe):
     total_lines_ratio_list = []
     ncss_ratio_list = []
     raw_metrics_dict = {}
-    
+
     # Generate a list of GitHub Actions source code
     source_code_list = source_code_dataframe["Source Code"].tolist()
     # Generate a list of files in a repository
     file_list = source_code_dataframe["File"].tolist()
-    # Generate a list of dates of commits 
+    # Generate a list of dates of commits
     date_list = source_code_dataframe["Date of Commit"].tolist()
-     # Generate a list of commit hashes
+    # Generate a list of commit hashes
     hash_list = source_code_dataframe["Commit Hash"].tolist()
 
     # Iterate through the list of file source code
@@ -289,7 +331,7 @@ def determine_raw_metrics(source_code_dataframe):
     # Create a datarame with the raw metrics dictionary
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
     raw_metrics_data.set_index("Date", inplace=True)
-    
+
     # plot = raw_metrics_data.plot()
     # figure = plot.get_figure()
 
@@ -299,7 +341,6 @@ def determine_raw_metrics(source_code_dataframe):
 
 def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
     """Combine dataframes associated to Halstead metrics, Cyclomatic Complexity, and raw metrics."""
-    
     # Create lists for all necessary metrics
     cyclomatic_complexity = complexity_data["Cyclomatic Complexity Score"].tolist()
     volume = halstead_data["Volume"].tolist()
@@ -318,7 +359,8 @@ def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
     combination["Vocabulary"] = vocab
     combination["Difficulty"] = difficulty
     combination["Effort"] = effort
-    
+    combination["Length"] = length
+
     return combination
 
 
@@ -335,7 +377,7 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
     date_list = source_code_dataframe["Date of Commit"].tolist()
     # Generate a list of commit hashes
     hash_list = source_code_dataframe["Commit Hash"].tolist()
-    
+
     # Set the index of the complete dataframe
     index = complete_dataframe.index
 
@@ -345,17 +387,27 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
         cc = row["Cyclomatic Complexity"]
         ncss = row["NCSS"]
         c = row["Number of Comments"]
-        
+
         # Calculate three different maintainability indexes
         if v != "NaN":
             # Calculate original_maintainability index
-            original_maintainability = 171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss)))
+            original_maintainability = (
+                171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss)))
+            )
             original_maintainability_list.append(original_maintainability)
             # Calculate SEI maintainability index
-            sei_maintainability = 171 - (5.2 * (np.log2(v))) - (0.23 * cc) - (16.2 * (np.log2(ncss))) + (50 * math.sin(math.sqrt(2.4 * c)))
+            sei_maintainability = (
+                171
+                - (5.2 * (np.log2(v)))
+                - (0.23 * cc)
+                - (16.2 * (np.log2(ncss)))
+                + (50 * math.sin(math.sqrt(2.4 * c)))
+            )
             sei_maintainability_list.append(sei_maintainability)
             # Calculate Microsoft maintainability index
-            vs_division = (171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss))))/171
+            vs_division = (
+                171 - (5.2 * (np.log(v))) - (0.23 * cc) - (16.2 * (np.log(ncss)))
+            ) / 171
             vs_maintainability = max(0, 100 * vs_division)
             vs_maintainability_list.append(vs_maintainability)
         # if volume is recorded as not a number (NaN) represent maintainability as NaN
@@ -363,18 +415,20 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
             original_maintainability_list.append("NaN")
             sei_maintainability_list.append("NaN")
             vs_maintainability_list.append("NaN")
-    
+
     # Create a dictionary with maintainability indexes
     maintainability_dict["Hash"] = hash_list
     maintainability_dict["Date"] = date_list
     maintainability_dict["File"] = file_list
-    maintainability_dict["Original Maintainability Index"] = original_maintainability_list
+    maintainability_dict[
+        "Original Maintainability Index"
+    ] = original_maintainability_list
     maintainability_dict["SEI Maintainability Index"] = sei_maintainability_list
     maintainability_dict["Microsoft Maintainability Index"] = vs_maintainability_list
 
     # Create a pandas dataframe from a maintainability dictionary
     maintainability_data = pd.DataFrame.from_dict(maintainability_dict)
-    
+
     # Set the index of the pandas dataframe to be the date of commit
     maintainability_data.set_index("Date", inplace=True)
 
@@ -388,7 +442,6 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
 
 def combine_with_maintainability(complete_dataframe, maintainability_data):
     """Create a final complete dataframe with all complexity measures."""
-
     # Put maintainability indexes in a list
     original = maintainability_data["Original Maintainability Index"].tolist()
     sei = maintainability_data["SEI Maintainability Index"].tolist()
@@ -417,24 +470,34 @@ def iterate_through_directory(root_directory: str):
     # Generate a list of each subdirectory in the specified root directory
     for subdir, dirs, files in os.walk(root_directory):
         repos_to_check.append(dirs)
-    
+
     # Iterate through each repository and perform methods to generate complexity scores
     for repository in repos_to_check[0]:
         path = pathlib.Path.home() / root_directory / repository
         source_code_dataframe = determine_file_contents(str(path))
         yaml_dataframe = generate_abstract_syntax_trees(source_code_dataframe)
-        
-        halstead_data = determine_halstead_metrics(yaml_dataframe, source_code_dataframe)
-        complexity_data = determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe)
+
+        halstead_data = determine_halstead_metrics(
+            yaml_dataframe, source_code_dataframe
+        )
+        complexity_data = determine_cyclomatic_complexity(
+            yaml_dataframe, source_code_dataframe
+        )
         raw_metrics_data = determine_raw_metrics(source_code_dataframe)
-        combined_data = combine_metrics(halstead_data, complexity_data, raw_metrics_data)
-        maintainability_data = calculate_maintainability(combined_data, source_code_dataframe)
-        complexity_dataframe = combine_with_maintainability(combined_data, maintainability_data)
+        combined_data = combine_metrics(
+            halstead_data, complexity_data, raw_metrics_data
+        )
+        maintainability_data = calculate_maintainability(
+            combined_data, source_code_dataframe
+        )
+        complexity_dataframe = combine_with_maintainability(
+            combined_data, maintainability_data
+        )
         # Add each repository-specific dataframe to a list
         dataframes_list.append(complexity_dataframe)
-    
+
     # Create a comprehensive dataframe with individual repo dataframes
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
-    
+
     return final_dataframe

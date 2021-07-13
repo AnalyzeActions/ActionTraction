@@ -5,8 +5,10 @@ from action_traction import basic_analysis_calculations as basic
 import os
 import pandas as pd
 
+
 def test_version():
-    assert __version__ == '0.1.0'
+    assert __version__ == "0.1.0"
+
 
 def test_generate_paths():
     repository_list = ["Repo_one", "Repo_two", "Repo_three"]
@@ -21,6 +23,7 @@ def test_calculate_size_metrics():
     test_data = pd.DataFrame.from_dict(test_dictionary, orient="columns")
     size_dictionary = basic.calculate_size_metrics(test_data)
     assert len(size_dictionary) == 4
+
 
 def test_size_minimum():
     test_dictionary = {}
@@ -44,6 +47,7 @@ def test_size_mean():
     test_data = pd.DataFrame.from_dict(test_dictionary, orient="columns")
     size_dictionary = basic.calculate_size_metrics(test_data)
     assert size_dictionary["Mean"] == 350.50
+
 
 def test_size_median():
     test_dictionary = {}
@@ -84,12 +88,14 @@ def test_lines_added_mean():
     added_dictionary = basic.calculate_lines_added_metrics(test_data)
     assert added_dictionary["Mean"] == 12.25
 
+
 def test_lines_added_median():
     test_dictionary = {}
     test_dictionary["Lines Added"] = [4, 12, 3, 30, 27]
     test_data = pd.DataFrame.from_dict(test_dictionary, orient="columns")
     added_dictionary = basic.calculate_lines_added_metrics(test_data)
     assert added_dictionary["Median"] == 12
+
 
 def test_calculate_lines_removed_metrics():
     test_dictionary = {}
@@ -129,7 +135,9 @@ def test_lines_removed_median():
     test_data = pd.DataFrame.from_dict(test_dictionary, orient="columns")
     removed_dictionary = basic.calculate_lines_removed_metrics(test_data)
     assert removed_dictionary["Median"] == 12
-#TODO: tmpfs fixture to test download_https
+
+
+# TODO: tmpfs fixture to test download_https
 
 # def test_download_https(tmp_path):
 #     d = tmp_path / "repos"
@@ -166,4 +174,3 @@ def test_lines_removed_median():
 #     number_columns = len(final_dataframe.columns)
 #     number_columns = len(final_dataframe.columns)
 #     assert number_columns == 8
-

@@ -1,3 +1,4 @@
+"""A python program to determine summary statistics relation to GitHub Actions configurations."""
 from pydriller import Repository
 from typing import List
 import statistics
@@ -11,18 +12,18 @@ def determine_repositories(initial_data):
     repository_list = initial_data["Repository"].tolist()
     # Find each unique repository name return the set
     repository_set = set(repository_list)
-    
+
     return repository_set
 
 
 def determine_files_per_repo(initial_data, repository_set):
     """Determine all GitHub Actions files for a specific repository."""
     repo_file_dict = {}
-    
+
     # Iterate through each unique repository name in the set
     for repository in repository_set:
         # Create a new dataset for each unique repository
-        new_data = initial_data.loc[initial_data['Repository'] == repository]
+        new_data = initial_data.loc[initial_data["Repository"] == repository]
         # Make a list of each of the files for a unique repository
         file_list = new_data["File"].tolist()
         # Determine each unique GitHub Actions file associated with a repository
@@ -33,13 +34,13 @@ def determine_files_per_repo(initial_data, repository_set):
     return repo_file_dict
 
 
-def determine_entire_repo_lifetime(repository_path:str):
+def determine_entire_repo_lifetime(repository_path: str):
     """Determine the time range of existence for a GitHub repository."""
     all_commit_dates = []
     # Iterate through commits in a repository and gather the dates of each commit
     for commit in Repository(repository_path).traverse_commits():
         all_commit_dates.append(commit.committer_date)
-    
+
     # Beginning date corresponds to the first commit in the repository
     beginning_date = all_commit_dates[0]
     # Most recent date corresponds to the most recent commit in the repository
@@ -49,7 +50,6 @@ def determine_entire_repo_lifetime(repository_path:str):
     repository_lifetime = most_recent_date - beginning_date
 
     return repository_lifetime
-
 
 
 def calculate_file_lifetime(initial_data, repo_file_dict):
@@ -65,20 +65,20 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
         # Iterate through list of GitHub Actions files for a certain repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data['File'] == file]
-            # Create a list of commit dates from intial dataset 
+            new_data = initial_data.loc[initial_data["File"] == file]
+            # Create a list of commit dates from intial dataset
             date_list = new_data["Date of Change"].tolist()
-            
+
             # Determine the beginning of a file represented by the first commit where it existed
             file_start = date_list[0]
             # Determine the most recent commit related to a .yml file
             file_end = date_list[len(date_list) - 1]
-            
+
             # Format datetime object
             file_start_datetime = datetime.datetime.fromisoformat(file_start)
             file_end_datetime = datetime.datetime.fromisoformat(file_end)
 
-            # Determine the lifetime of the GitHub Action file 
+            # Determine the lifetime of the GitHub Action file
             file_lifetime = file_end_datetime - file_start_datetime
             # Determine how long a Action file has existed in relation to the entire repo
             percentage_of_lifetime = (file_lifetime / repository_lifetime) * 100
@@ -92,11 +92,11 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
 
             for date in date_list:
                 lifetime_dictionary["Date"] = [date]
-            
+
             # Create a unique pandas dataframe for each repository dictionary
             initial_lifetime_dataframe = pd.DataFrame.from_dict(lifetime_dictionary)
             dataframe_list.append(initial_lifetime_dataframe)
-        
+
     # Create a complete pandas dataframe with information relating to every repository
     for result in dataframe_list:
         lifetime_dataframe = lifetime_dataframe.append(result)
@@ -109,7 +109,6 @@ def calculate_size_metrics(initial_data, repo_file_dict):
     minimum = 0
     maximum = 0
     size_dictionary = {}
-    final_dict = {}
     dataframe_list = []
     size_dataframe = pd.DataFrame()
 
@@ -118,7 +117,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each file in a repo
-            new_data = initial_data.loc[initial_data['File'] == file]
+            new_data = initial_data.loc[initial_data["File"] == file]
             size_list = new_data["File Size in Bytes"].tolist()
 
             # Generate summary statistics relating to file size
@@ -128,7 +127,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
             median = statistics.median(size_list)
             st_dev = statistics.stdev(size_list)
             variance = statistics.variance(size_list)
-            
+
             # Create dictionary for each repository with size summary stats
             size_dictionary["Repository"] = [repo]
             size_dictionary["File"] = [file]
@@ -142,7 +141,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
             # Create size stats dataframe for each repo
             initial_size_dataframe = pd.DataFrame.from_dict(size_dictionary)
             dataframe_list.append(initial_size_dataframe)
-    
+
     # Create a complete pandas dataframe with information relating to every repository
     for result in dataframe_list:
         size_dataframe = size_dataframe.append(result)
@@ -153,7 +152,6 @@ def calculate_size_metrics(initial_data, repo_file_dict):
 def calculate_author_metrics(initial_data, repo_file_dict):
     """Determine summary statistics relating to authors of GitHub Actions files."""
     author_dictionary = {}
-    count_unique_authors = 0
     dataframe_list = []
     author_dataframe = pd.DataFrame()
 
@@ -162,7 +160,7 @@ def calculate_author_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data['File'] == file]
+            new_data = initial_data.loc[initial_data["File"] == file]
             # Create a list of authors for commits of each Action file
             author_list = new_data["Author"].tolist()
             # Create a list of unique authors related to each Action file
@@ -175,21 +173,29 @@ def calculate_author_metrics(initial_data, repo_file_dict):
                 # Count how many commits an author contributed to a repo's GitHub Actions
                 unique_author_contribution = author_list.count(unique_author)
                 # Determine percentage of author contribution
-                author_percentage_contribution = (unique_author_contribution) / len(author_list) * 100
+                author_percentage_contribution = (
+                    (unique_author_contribution) / len(author_list) * 100
+                )
                 # Create list of author contribution percentage
                 list_percentage_contributions.append(author_percentage_contribution)
-                
+
                 # Create dictionary with author summary stats
                 author_dictionary["Repository"] = [repo]
                 author_dictionary["File"] = [file]
                 author_dictionary["Author"] = [unique_author]
-                author_dictionary["Number Corresponding Commits"] = unique_author_contribution
-                author_dictionary["Percentage Contribution"] = [author_percentage_contribution]
+                author_dictionary[
+                    "Number Corresponding Commits"
+                ] = unique_author_contribution
+                author_dictionary["Percentage Contribution"] = [
+                    author_percentage_contribution
+                ]
 
                 # Create pandas dataframe from dictionary
-                initial_dataframe = pd.DataFrame.from_dict(author_dictionary, orient="columns")
+                initial_dataframe = pd.DataFrame.from_dict(
+                    author_dictionary, orient="columns"
+                )
                 dataframe_list.append(initial_dataframe)
-    
+
     # Create pandas dataframe with information for all repositories
     for result in dataframe_list:
         author_dataframe = author_dataframe.append(result)
@@ -200,7 +206,6 @@ def calculate_author_metrics(initial_data, repo_file_dict):
 def calculate_committer_metrics(initial_data, repo_file_dict):
     """Determine summary statistics relating to committers of GitHub Actions files."""
     committer_dictionary = {}
-    count_unique_committer = 0
     dataframe_list = []
     committer_dataframe = pd.DataFrame()
 
@@ -209,7 +214,7 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data['File'] == file]
+            new_data = initial_data.loc[initial_data["File"] == file]
             # Create a list of committers for each file
             committer_list = new_data["Committer"].tolist()
             # Create a set of each unqiue committer associated with a Actions file
@@ -222,26 +227,87 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
                 # Count how many commits a committer is associated with in a repository
                 unique_committer_contribution = committer_list.count(unique_committer)
                 # Determine percentage of contribution for a committer
-                committer_percentage_contribution = (unique_committer_contribution) / len(committer_list) * 100
+                committer_percentage_contribution = (
+                    (unique_committer_contribution) / len(committer_list) * 100
+                )
                 # Create a list of contribution percentages
                 list_percentage_contributions.append(committer_percentage_contribution)
-                
+
                 # Create a dictionary for committer summary stats
                 committer_dictionary["Repository"] = [repo]
                 committer_dictionary["File"] = [file]
                 committer_dictionary["Committer"] = [unique_committer]
-                committer_dictionary["Number Corresponding Commits"] = unique_committer_contribution
-                committer_dictionary["Percentage Contribution"] = [committer_percentage_contribution]
+                committer_dictionary[
+                    "Number Corresponding Commits"
+                ] = unique_committer_contribution
+                committer_dictionary["Percentage Contribution"] = [
+                    committer_percentage_contribution
+                ]
 
                 # Create a dataframe from committer summary stats dictionary for each repo
-                initial_dataframe = pd.DataFrame.from_dict(committer_dictionary, orient="columns")
+                initial_dataframe = pd.DataFrame.from_dict(
+                    committer_dictionary, orient="columns"
+                )
                 dataframe_list.append(initial_dataframe)
-    
+
     # Create a dataframe for each repo and committer summary stats
     for result in dataframe_list:
         committer_dataframe = committer_dataframe.append(result)
 
     return committer_dataframe
+
+
+# TODO: Create functionality for multiple repos in dataset
+def contributors_enitre_repo(directory, entire_repo_data, repo_set):
+    """Determine the total contributors to a GitHub repository."""
+    author_contributions_list = []
+    percent_contributions = []
+    contribution_data = pd.DataFrame()
+    contributor_dictionary = {}
+    repository_list = []
+    all_authors = []
+    dataframe_list = []
+
+    for repo in repo_set:
+        print(repo)
+        new_data = entire_repo_data.loc[entire_repo_data["Repository"] == repo]
+
+        # Determine all authors of commits in a repository
+        author_list = new_data["Author"].tolist()
+        # Determine each unique author for a GitHub repository
+        author_set = set(author_list)
+
+        print(author_set)
+
+        # Iterate through all unique authors and determine contribution
+        for author in author_set:
+            # Count how many commits an author is associated with in a repo
+            author_contribution = author_list.count(author)
+            # Calculate percentage of contribution based on commits
+            author_percentage_contribution = ((author_contribution) / (len(author_list))) * 100
+
+            author_contributions_list.append(author_contribution)
+            percent_contributions.append(author_percentage_contribution)
+
+            repository_list.append(repo)
+            all_authors.append(author)
+
+        # Create a dictionary for committer summary stats
+        contributor_dictionary["Repository"] = repository_list
+        contributor_dictionary["Contributor"] = all_authors
+        contributor_dictionary["Number Corresponding Commits"] = author_contributions_list
+        contributor_dictionary["Percentage Contribution"] = percent_contributions
+
+        # Create a dataframe from committer summary stats dictionary for each repo
+        initial_dataframe = pd.DataFrame.from_dict(
+            contributor_dictionary, orient="columns"
+        )
+        dataframe_list.append(initial_dataframe)
+
+    for data in dataframe_list:
+        contribution_data = contribution_data.append(data)
+
+    return contribution_data
 
 
 def calculate_lines_added_metrics(initial_data, repo_file_dict):
@@ -255,7 +321,7 @@ def calculate_lines_added_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data['File'] == file]
+            new_data = initial_data.loc[initial_data["File"] == file]
             # Create a list of lines added metrics for each file
             lines_added_list = new_data["Lines Added"].tolist()
 
@@ -299,7 +365,7 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data['File'] == file]
+            new_data = initial_data.loc[initial_data["File"] == file]
             # Create a list of lines removed metrics for each file
             lines_removed_list = new_data["Lines Removed"].tolist()
 
@@ -343,7 +409,7 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data['File'] == file]
+            new_data = initial_data.loc[initial_data["File"] == file]
             # Create list of commit messages relating to each file
             commit_message_list = new_data["Commit Message"].tolist()
 
@@ -382,8 +448,48 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
         commit_message_dataframe = commit_message_dataframe.append(result)
 
     return commit_message_dataframe
-            
+
+
+def determine_contributors(directory: str):
+    """Determine who has contributed to GitHub Actions files."""
+    csv_path = directory + "/minedRepos.csv"
+    entire_data_path = directory + "/entireRepo.csv"
+    initial_data = pd.read_csv(csv_path)
+    entire_repo_data = pd.read_csv(entire_data_path)
+    repository_set = determine_repositories(initial_data)
+    repo_file_dict = determine_files_per_repo(initial_data, repository_set)
+
+    author_results = calculate_author_metrics(initial_data, repo_file_dict)
+    committer_results = calculate_committer_metrics(initial_data, repo_file_dict)
+    author_results.to_csv(directory + "/authors.csv")
+    committer_results.to_csv(directory + "/committers.csv")
+
+    contributors_results = contributors_enitre_repo(directory, entire_repo_data, repository_set)
+
+    complete_dataframe = author_results
+    committers = committer_results["Committer"].tolist()
+    committer_number = committer_results["Number Corresponding Commits"].tolist()
+    committer_contribution = committer_results["Percentage Contribution"].tolist()
+    all_contributors = contributors_results["Contributor"].tolist()
+    contributors_number = contributors_results["Number Corresponding Commits"].tolist()
+    contributor_contribution = contributors_results["Percentage Contribution"].tolist()
+
+    complete_dataframe["Committer"] = committers
+    complete_dataframe["Committer Commits"] = committer_number
+    complete_dataframe["Committer Contribution"] = committer_contribution
+    
+    # complete_dataframe["All Contributors"] = all_contributors
+    # complete_dataframe["Contributor Commits"] = contributors_number
+    # complete_dataframe["Contributions"] = contributor_contribution
+
+    contribution_path = directory + "/contributors.csv"
+    complete_dataframe.to_csv(contribution_path)
+
+    return complete_dataframe
+
+
 def perform_specified_summarization(specified_metrics: List[str], directory: str):
+    """Generate datasets based on user input."""
     csv_path = directory + "/minedRepos.csv"
     initial_data = pd.read_csv(csv_path)
     repository_set = determine_repositories(initial_data)
@@ -406,5 +512,7 @@ def perform_specified_summarization(specified_metrics: List[str], directory: str
         print(added_results)
         print(removed_results)
     if "Messages" in specified_metrics:
-        messages_results = calculate_commit_message_metrics(initial_data, repo_file_dict)
+        messages_results = calculate_commit_message_metrics(
+            initial_data, repo_file_dict
+        )
         print(messages_results)
