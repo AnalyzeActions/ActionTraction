@@ -1,5 +1,5 @@
+"""A python program to determine basic metrics of GitHub Actions configuration over time."""
 import pandas as pd
-
 
 def determine_repositories(initial_data):
     """Find each repository in the complete dataset of repository information."""
@@ -73,6 +73,7 @@ def lines_removed_over_time(initial_data, repository_set):
 
 
 def combine_dataframes(directory):
+    """Combine all dataframes with basic metrics to generate one significant dataframe."""
     initial_data_path = directory + "/minedRepos.csv"
     initial_data = pd.read_csv(initial_data_path)
     repository_set = determine_repositories(initial_data)
