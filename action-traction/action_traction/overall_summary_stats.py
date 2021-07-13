@@ -1,3 +1,4 @@
+"""A python program to determine summary statistics relation to GitHub Actions configurations."""
 from pydriller import Repository
 from typing import List
 import statistics
@@ -449,6 +450,7 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
 
 
 def determine_contributors(directory: str):
+    """Determine who has contributed to GitHub Actions files."""
     csv_path = directory + "/minedRepos.csv"
     initial_data = pd.read_csv(csv_path)
     repository_set = determine_repositories(initial_data)
@@ -461,6 +463,7 @@ def determine_contributors(directory: str):
 
 
 def perform_specified_summarization(specified_metrics: List[str], directory: str):
+    """Generate datasets based on user input."""
     csv_path = directory + "/minedRepos.csv"
     initial_data = pd.read_csv(csv_path)
     repository_set = determine_repositories(initial_data)
