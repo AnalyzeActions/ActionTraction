@@ -19,7 +19,7 @@ def size_over_time(initial_data, repository_set):
 
     # Iterate through every repo and generate a unique dataframe for each
     for repo in repository_set:
-        new_data = initial_data.loc[initial_data["Repository"] == repo]
+        new_data = initial_data.loc[initial_data["repo"] == repo]
         # Remove unnecessary columns from dataframe
         new_data.drop(
             new_data.columns[[0, 5, 6, 7, 8, 9, 10, 11]], axis=1, inplace=True
@@ -40,7 +40,7 @@ def lines_added_over_time(initial_data, repository_set):
 
     # Iterate through every repo and generate a unique dataframe for each
     for repo in repository_set:
-        new_data = initial_data.loc[initial_data["Repository"] == repo]
+        new_data = initial_data.loc[initial_data["repo"] == repo]
         # Remove unnecessary columns from dataframe
         new_data.drop(
             new_data.columns[[0, 4, 5, 6, 7, 8, 10, 11]], axis=1, inplace=True
@@ -61,7 +61,7 @@ def lines_removed_over_time(initial_data, repository_set):
 
     # Iterate through every repo and generate a unique dataframe for each
     for repo in repository_set:
-        new_data = initial_data.loc[initial_data["Repository"] == repo]
+        new_data = initial_data.loc[initial_data["repo"] == repo]
         # Remove unnecessary columns from dataframe
         new_data.drop(new_data.columns[[0, 4, 5, 6, 7, 8, 9, 11]], axis=1, inplace=True)
         dataframe_list.append(new_data)
@@ -83,12 +83,12 @@ def combine_dataframes(directory):
     added_data = lines_added_over_time(initial_data, repository_set)
     removed_data = lines_removed_over_time(initial_data, repository_set)
 
-    lines_added_list = added_data["Lines Added"].tolist()
-    lines_removed_list = removed_data["Lines Removed"].tolist()
+    lines_added_list = added_data["lines_added"].tolist()
+    lines_removed_list = removed_data["lines_added"].tolist()
 
     final_dataset = size_data
-    final_dataset["Lines Added"] = lines_added_list
-    final_dataset["Lines Removed"] = lines_removed_list
+    final_dataset["lines_added"] = lines_added_list
+    final_dataset["lines_removed"] = lines_removed_list
 
     final_dataset_path = directory + "/diffs.csv"
     final_dataset.to_csv(final_dataset_path)
