@@ -66,24 +66,22 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
             date_list.append(commit.committer_date)
-            branches_list.append(commit.branches)
             commit_messages_list.append(commit.msg)
             size_bytes_list.append(os.stat(complete_file).st_size)
             lines_added_list.append(commit.insertions)
             lines_deleted_list.append(commit.deletions)
 
         # Create a dictionary for a repository and its corresponding metrics
-        raw_data["Hash"] = hash_list
-        raw_data["Repository"] = repository_list
-        raw_data["File"] = file_list
-        raw_data["File Size in Bytes"] = size_bytes_list
-        raw_data["Author"] = author_list
-        raw_data["Committer"] = committer_list
-        raw_data["Branches"] = branches_list
-        raw_data["Commit Message"] = commit_messages_list
-        raw_data["Lines Added"] = lines_added_list
-        raw_data["Lines Removed"] = lines_deleted_list
-        raw_data["Date of Change"] = date_list
+        raw_data["hash"] = hash_list
+        raw_data["repo"] = repository_list
+        raw_data["file"] = file_list
+        raw_data["size_bytes"] = size_bytes_list
+        raw_data["author"] = author_list
+        raw_data["committer"] = committer_list
+        raw_data["commit_message"] = commit_messages_list
+        raw_data["lines_added"] = lines_added_list
+        raw_data["lines_removed"] = lines_deleted_list
+        raw_data["date"] = date_list
 
     # Create a pandas dictionary for repository dictionary
     first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
@@ -113,11 +111,11 @@ def iterate_entire_repo(repository_path: str):
             entire_repo_data = pd.DataFrame()
 
         # Create a dictionary with information relating to the entire repository
-    raw_data["Hash"] = hash_list
-    raw_data["Date"] = date_list
-    raw_data["Repository"] = repository_list
-    raw_data["Author"] = author_list
-    raw_data["Files Changed"] = files_changed_list
+    raw_data["hash"] = hash_list
+    raw_data["date"] = date_list
+    raw_data["repo"] = repository_list
+    raw_data["author"] = author_list
+    raw_data["files_changed"] = files_changed_list
 
     # Create a pandas dataframe from the raw dictionary
     entire_repo_data = pd.DataFrame.from_dict(raw_data, orient="columns")
@@ -127,17 +125,17 @@ def iterate_entire_repo(repository_path: str):
 
 def combine_rows_whole_repo(entire_repo_data):
     """Combine rows with the same hash in the entire repository dataframe."""
-    hash_list = entire_repo_data["Hash"].tolist()
+    hash_list = entire_repo_data["hash"].tolist()
     hash_set = set(hash_list)
     hash_dict = {}
     complete_dataframe = pd.DataFrame()
 
     # Iterate through commit hashes and create new datasets for each
     for commit_hash in hash_set:
-        new_data = entire_repo_data.loc[entire_repo_data["Hash"] == commit_hash]
-        modified_files = new_data["Files Changed"].tolist()
+        new_data = entire_repo_data.loc[entire_repo_data["hash"] == commit_hash]
+        modified_files = new_data["files_changed"].tolist()
 
-        repositories_list = new_data["Repository"].tolist()
+        repositories_list = new_data["repo"].tolist()
         repo_name = repositories_list[0]
 
         hash_dict[(commit_hash, repo_name)] = modified_files
