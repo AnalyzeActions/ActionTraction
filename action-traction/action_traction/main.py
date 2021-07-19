@@ -13,14 +13,14 @@ app = typer.Typer()
 
 
 @app.command()
-def download_repositories(repositories: str, directory: Path):
+def download(repositories: str, directory: Path):
     """Import GitHub repository credentials."""
     path_list = download.generate_save_path(repositories, directory)
     number_repos = download.download_https(repositories, path_list)
 
 
 @app.command()
-def generate_repository_metrics(directory: str):
+def repository_metrics(directory: str):
     """Generate a .csv file for all given repositories."""
     traverse_repos.iterate_through_directory(directory)
 

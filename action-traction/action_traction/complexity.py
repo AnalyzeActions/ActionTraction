@@ -325,7 +325,7 @@ def determine_raw_metrics(source_code_dataframe):
     raw_metrics_dict["amount_commends"] = comments_list
     raw_metrics_dict["loc"] = lines_code
     raw_metrics_dict["ncss"] = lines_source_code
-    raw_metrics_dict["comments_loc_comparison] = total_lines_ratio_list
+    raw_metrics_dict["comments_loc_comparison"] = total_lines_ratio_list
     raw_metrics_dict["coments_ncss_comparison"] = ncss_ratio_list
 
     # Create a datarame with the raw metrics dictionary
