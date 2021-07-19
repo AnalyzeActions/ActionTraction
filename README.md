@@ -1,3 +1,3 @@
-# ActionTraction
-
-## Madelyn Kapfhammer and Gregory Kapfhammer
+<p align="center">
+  <img src="ActionTraction.png" />
+</p>
