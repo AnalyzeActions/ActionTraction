@@ -1,8 +1,8 @@
 """The command line interface for ActionTraction."""
 from action_traction import download
 from action_traction import traverse
-from action_traction import basic_metrics_over_time as basic
-from action_traction import file_contents_analysis as file_contents
+from action_traction import basic_metrics as basic
+from action_traction import contents_metrics as file_contents
 from action_traction import complexity
 from action_traction import summarization as summary
 from typing import List
