@@ -1,5 +1,5 @@
 """The command line interface for ActionTraction."""
-from action_traction import download_repos
+from action_traction import download
 from action_traction import traverse_repos
 from action_traction import basic_metrics_over_time as basic
 from action_traction import file_contents_analysis as file_contents
@@ -15,8 +15,8 @@ app = typer.Typer()
 @app.command()
 def download_repositories(repositories: str, directory: Path):
     """Import GitHub repository credentials."""
-    path_list = download_repos.generate_save_path(repositories, directory)
-    number_repos = download_repos.download_https(repositories, path_list)
+    path_list = download.generate_save_path(repositories, directory)
+    number_repos = download.download_https(repositories, path_list)
 
 
 @app.command()
