@@ -49,6 +49,6 @@ def contributors(directory_path: str):
     summary.determine_contributors(directory_path)
 
 @app.command()
-def whole_repo():
+def whole_repo(directory_path: str):
     """Determine metrics for every commit in a GitHub repository."""
-    summary.entire_repo_metrics("/home/mkapfhammer/Documents/test_traction")
+    summary.entire_repo_metrics(directory_path)
