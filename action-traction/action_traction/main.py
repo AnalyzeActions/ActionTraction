@@ -13,7 +13,7 @@ app = typer.Typer()
 
 
 @app.command()
-def download_repositories(repositories: List[str], directory: Path):
+def download_repositories(repositories: str, directory: Path):
     """Import GitHub repository credentials."""
     path_list = download_repos.generate_save_path(repositories, directory)
     number_repos = download_repos.download_https(repositories, path_list)
