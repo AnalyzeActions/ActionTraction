@@ -25,7 +25,7 @@ def determine_files_per_repo(initial_data, repository_set):
         # Create a new dataset for each unique repository
         new_data = initial_data.loc[initial_data["Repository"] == repository]
         # Make a list of each of the files for a unique repository
-        file_list = new_data["File"].tolist()
+        file_list = new_data["file"].tolist()
         # Determine each unique GitHub Actions file associated with a repository
         file_set = set(file_list)
         # Create a dictionary with repository as key and corresponding files as value
@@ -65,9 +65,9 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
         # Iterate through list of GitHub Actions files for a certain repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["File"] == file]
+            new_data = initial_data.loc[initial_data["file"] == file]
             # Create a list of commit dates from intial dataset
-            date_list = new_data["Date of Change"].tolist()
+            date_list = new_data["date"].tolist()
 
             # Determine the beginning of a file represented by the first commit where it existed
             file_start = date_list[0]
@@ -84,14 +84,14 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
             percentage_of_lifetime = (file_lifetime / repository_lifetime) * 100
 
             # Create a dictionary with all necessary information relating to lifetime
-            lifetime_dictionary["Repository"] = [repo]
-            lifetime_dictionary["File"] = [file]
-            lifetime_dictionary["Repository Lifetime"] = [repository_lifetime]
-            lifetime_dictionary["File Lifetime"] = [file_lifetime]
-            lifetime_dictionary["Percentage of File Existence"] = percentage_of_lifetime
+            lifetime_dictionary["repo"] = [repo]
+            lifetime_dictionary["file"] = [file]
+            lifetime_dictionary["repo_lifetime"] = [repository_lifetime]
+            lifetime_dictionary["file_lifetime"] = [file_lifetime]
+            lifetime_dictionary["file_existence"] = percentage_of_lifetime
 
             for date in date_list:
-                lifetime_dictionary["Date"] = [date]
+                lifetime_dictionary["date"] = [date]
 
             # Create a unique pandas dataframe for each repository dictionary
             initial_lifetime_dataframe = pd.DataFrame.from_dict(lifetime_dictionary)
@@ -117,8 +117,8 @@ def calculate_size_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each file in a repo
-            new_data = initial_data.loc[initial_data["File"] == file]
-            size_list = new_data["File Size in Bytes"].tolist()
+            new_data = initial_data.loc[initial_data["file"] == file]
+            size_list = new_data["size_bytes"].tolist()
 
             # Generate summary statistics relating to file size
             minimum = min(size_list)
@@ -129,14 +129,14 @@ def calculate_size_metrics(initial_data, repo_file_dict):
             variance = statistics.variance(size_list)
 
             # Create dictionary for each repository with size summary stats
-            size_dictionary["Repository"] = [repo]
-            size_dictionary["File"] = [file]
-            size_dictionary["Minimum"] = [minimum]
-            size_dictionary["Maximum"] = [maximum]
-            size_dictionary["Mean"] = [mean]
-            size_dictionary["Median"] = [median]
-            size_dictionary["Standard Deviation"] = [st_dev]
-            size_dictionary["Variance"] = [variance]
+            size_dictionary["repo"] = [repo]
+            size_dictionary["file"] = [file]
+            size_dictionary["min"] = [minimum]
+            size_dictionary["max"] = [maximum]
+            size_dictionary["mean"] = [mean]
+            size_dictionary["median"] = [median]
+            size_dictionary["standard_deviation"] = [st_dev]
+            size_dictionary["variance"] = [variance]
 
             # Create size stats dataframe for each repo
             initial_size_dataframe = pd.DataFrame.from_dict(size_dictionary)
@@ -160,9 +160,9 @@ def calculate_author_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["File"] == file]
+            new_data = initial_data.loc[initial_data["file"] == file]
             # Create a list of authors for commits of each Action file
-            author_list = new_data["Author"].tolist()
+            author_list = new_data["author"].tolist()
             # Create a list of unique authors related to each Action file
             author_set = set(author_list)
 
@@ -180,13 +180,13 @@ def calculate_author_metrics(initial_data, repo_file_dict):
                 list_percentage_contributions.append(author_percentage_contribution)
 
                 # Create dictionary with author summary stats
-                author_dictionary["Repository"] = [repo]
-                author_dictionary["File"] = [file]
-                author_dictionary["Author"] = [unique_author]
+                author_dictionary["repo"] = [repo]
+                author_dictionary["file"] = [file]
+                author_dictionary["author"] = [unique_author]
                 author_dictionary[
-                    "Number Corresponding Commits"
+                    "author_commits"
                 ] = unique_author_contribution
-                author_dictionary["Percentage Contribution"] = [
+                author_dictionary["author_contribution"] = [
                     author_percentage_contribution
                 ]
 
@@ -214,9 +214,9 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["File"] == file]
+            new_data = initial_data.loc[initial_data["file"] == file]
             # Create a list of committers for each file
-            committer_list = new_data["Committer"].tolist()
+            committer_list = new_data["committer"].tolist()
             # Create a set of each unqiue committer associated with a Actions file
             committer_set = set(committer_list)
 
@@ -234,13 +234,13 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
                 list_percentage_contributions.append(committer_percentage_contribution)
 
                 # Create a dictionary for committer summary stats
-                committer_dictionary["Repository"] = [repo]
-                committer_dictionary["File"] = [file]
-                committer_dictionary["Committer"] = [unique_committer]
+                committer_dictionary["repo"] = [repo]
+                committer_dictionary["file"] = [file]
+                committer_dictionary["committer"] = [unique_committer]
                 committer_dictionary[
-                    "Number Corresponding Commits"
+                    "committer_commits"
                 ] = unique_committer_contribution
-                committer_dictionary["Percentage Contribution"] = [
+                committer_dictionary["committer_contribution"] = [
                     committer_percentage_contribution
                 ]
 
@@ -273,7 +273,7 @@ def contributors_enitre_repo(directory, entire_repo_data, repo_set):
         new_data = entire_repo_data.loc[entire_repo_data["Repository"] == repo]
 
         # Determine all authors of commits in a repository
-        author_list = new_data["Author"].tolist()
+        author_list = new_data["author"].tolist()
         # Determine each unique author for a GitHub repository
         author_set = set(author_list)
 
@@ -293,10 +293,10 @@ def contributors_enitre_repo(directory, entire_repo_data, repo_set):
             all_authors.append(author)
 
         # Create a dictionary for committer summary stats
-        contributor_dictionary["Repository"] = repository_list
-        contributor_dictionary["Contributor"] = all_authors
-        contributor_dictionary["Number Corresponding Commits"] = author_contributions_list
-        contributor_dictionary["Percentage Contribution"] = percent_contributions
+        contributor_dictionary["repo"] = repository_list
+        contributor_dictionary["contributor"] = all_authors
+        contributor_dictionary["contributor_commits"] = author_contributions_list
+        contributor_dictionary["committer_contribution"] = percent_contributions
 
         # Create a dataframe from committer summary stats dictionary for each repo
         initial_dataframe = pd.DataFrame.from_dict(
@@ -321,9 +321,9 @@ def calculate_lines_added_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["File"] == file]
+            new_data = initial_data.loc[initial_data["file"] == file]
             # Create a list of lines added metrics for each file
-            lines_added_list = new_data["Lines Added"].tolist()
+            lines_added_list = new_data["lines_added"].tolist()
 
             # Generate summary statistics relating to lines added
             mean = statistics.mean(lines_added_list)
@@ -334,14 +334,14 @@ def calculate_lines_added_metrics(initial_data, repo_file_dict):
             variance = statistics.variance(lines_added_list)
 
             # Create dictionary for each repository with lines added summary stats
-            added_dictionary["Repository"] = [repo]
-            added_dictionary["File"] = [file]
-            added_dictionary["Minimum"] = [minimum]
-            added_dictionary["Maximum"] = [maximum]
-            added_dictionary["Mean"] = [mean]
-            added_dictionary["Median"] = [median]
-            added_dictionary["Standard Deviation"] = [st_dev]
-            added_dictionary["Variance"] = [variance]
+            added_dictionary["repo"] = [repo]
+            added_dictionary["file"] = [file]
+            added_dictionary["min"] = [minimum]
+            added_dictionary["max"] = [maximum]
+            added_dictionary["mean"] = [mean]
+            added_dictionary["median"] = [median]
+            added_dictionary["standard_deviation"] = [st_dev]
+            added_dictionary["variance"] = [variance]
 
             # Create a dataframe from lines added summary stats dictionary
             initial_size_dataframe = pd.DataFrame.from_dict(added_dictionary)
@@ -365,9 +365,9 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["File"] == file]
+            new_data = initial_data.loc[initial_data["file"] == file]
             # Create a list of lines removed metrics for each file
-            lines_removed_list = new_data["Lines Removed"].tolist()
+            lines_removed_list = new_data["lines_removed"].tolist()
 
             # Generate summary statistics relating to lines removed
             mean = statistics.mean(lines_removed_list)
@@ -378,14 +378,14 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
             variance = statistics.variance(lines_removed_list)
 
             # Create dictionary for each repository with lines removed summary stats
-            removed_dictionary["Repository"] = [repo]
-            removed_dictionary["File"] = [file]
-            removed_dictionary["Minimum"] = [minimum]
-            removed_dictionary["Maximum"] = [maximum]
-            removed_dictionary["Mean"] = [mean]
-            removed_dictionary["Median"] = [median]
-            removed_dictionary["Standard Deviation"] = [st_dev]
-            removed_dictionary["Variance"] = [variance]
+            removed_dictionary["repo"] = [repo]
+            removed_dictionary["file"] = [file]
+            removed_dictionary["min"] = [minimum]
+            removed_dictionary["max"] = [maximum]
+            removed_dictionary["mean"] = [mean]
+            removed_dictionary["median"] = [median]
+            removed_dictionary["standard_deviation"] = [st_dev]
+            removed_dictionary["variance"] = [variance]
 
             # Create a dataframe from lines removed summary stats dictionary
             initial_size_dataframe = pd.DataFrame.from_dict(removed_dictionary)
@@ -409,9 +409,9 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["File"] == file]
+            new_data = initial_data.loc[initial_data["file"] == file]
             # Create list of commit messages relating to each file
-            commit_message_list = new_data["Commit Message"].tolist()
+            commit_message_list = new_data["commit_message"].tolist()
 
             size_message_list = []
 
@@ -429,15 +429,15 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
             variance = statistics.variance(size_message_list)
 
             # Create dictionary of summary statistics relating to size of commit message
-            commit_message_dictionary["Repository"] = [repo]
-            commit_message_dictionary["File"] = [file]
-            commit_message_dictionary["Commit Message Size"] = [size_message_list]
-            commit_message_dictionary["Minimum"] = [minimum]
-            commit_message_dictionary["Maximum"] = [maximum]
-            commit_message_dictionary["Mean"] = [mean]
-            commit_message_dictionary["Median"] = [median]
-            commit_message_dictionary["Standard Deviation"] = [st_dev]
-            commit_message_dictionary["Variance"] = [variance]
+            commit_message_dictionary["repo"] = [repo]
+            commit_message_dictionary["file"] = [file]
+            commit_message_dictionary["message_size"] = [size_message_list]
+            commit_message_dictionary["min"] = [minimum]
+            commit_message_dictionary["max"] = [maximum]
+            commit_message_dictionary["mean"] = [mean]
+            commit_message_dictionary["median"] = [median]
+            commit_message_dictionary["standard_deviation"] = [st_dev]
+            commit_message_dictionary["variance"] = [variance]
 
             # Create a dataframe from commit message dictionary
             initial_size_dataframe = pd.DataFrame.from_dict(commit_message_dictionary)
@@ -467,16 +467,16 @@ def determine_contributors(directory: str):
     contributors_results = contributors_enitre_repo(directory, entire_repo_data, repository_set)
 
     complete_dataframe = author_results
-    committers = committer_results["Committer"].tolist()
-    committer_number = committer_results["Number Corresponding Commits"].tolist()
-    committer_contribution = committer_results["Percentage Contribution"].tolist()
-    all_contributors = contributors_results["Contributor"].tolist()
-    contributors_number = contributors_results["Number Corresponding Commits"].tolist()
-    contributor_contribution = contributors_results["Percentage Contribution"].tolist()
+    committers = committer_results["committer"].tolist()
+    committer_number = committer_results["committer_commits"].tolist()
+    committer_contribution = committer_results["committer_contribution"].tolist()
+    all_contributors = contributors_results["contributor"].tolist()
+    contributors_number = contributors_results["contributor_commits"].tolist()
+    contributor_contribution = contributors_results["contributor_contribution"].tolist()
 
-    complete_dataframe["Committer"] = committers
-    complete_dataframe["Committer Commits"] = committer_number
-    complete_dataframe["Committer Contribution"] = committer_contribution
+    complete_dataframe["committer"] = committers
+    complete_dataframe["committer_commits"] = committer_number
+    complete_dataframe["committer_contribution"] = committer_contribution
     
     # complete_dataframe["All Contributors"] = all_contributors
     # complete_dataframe["Contributor Commits"] = contributors_number
