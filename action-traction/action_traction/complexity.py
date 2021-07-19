@@ -29,11 +29,11 @@ def determine_file_contents(repository_path: str):
                 repository_path_list.append(repository_path)
 
                 # Create a dictionary relating to source code of GitHub Actions file
-                source_code_dict["Commit Hash"] = commit.hash
-                source_code_dict["Repository"] = [repository_path]
-                source_code_dict["File"] = [modification.new_path]
-                source_code_dict["Source Code"] = modification.source_code
-                source_code_dict["Date of Commit"] = commit.committer_date
+                source_code_dict["hash"] = commit.hash
+                source_code_dict["repo"] = [repository_path]
+                source_code_dict["file"] = [modification.new_path]
+                source_code_dict["source_code"] = modification.source_code
+                source_code_dict["date"] = commit.committer_date
 
                 # Create a dataframe from the existing source code dictionary
                 code_dataframe = pd.DataFrame.from_dict(source_code_dict)
@@ -51,7 +51,7 @@ def generate_abstract_syntax_trees(source_code_dataframe):
     yaml_list = []
 
     # Generate a list of GitHub Actions source code
-    source_code_list = source_code_dataframe["Source Code"].tolist()
+    source_code_list = source_code_dataframe["source_code"].tolist()
     # Iterate through list of source code and convert to abstract syntax tree
     for source_code in source_code_list:
         if source_code is not None:
@@ -65,7 +65,7 @@ def generate_abstract_syntax_trees(source_code_dataframe):
         else:
             yaml_list.append("No file contents")
 
-    source_code_dataframe["Parse Status"] = yaml_list
+    source_code_dataframe["parse_status"] = yaml_list
 
     # Generate a dataframe with source code abstract syntax trees
     yaml_dataframe = source_code_dataframe
@@ -85,13 +85,13 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     effort_list = []
 
     # Generate a list of source code abstract syntax trees
-    abstract_trees_list = yaml_dataframe["Parse Status"].tolist()
+    abstract_trees_list = yaml_dataframe["parse_status"].tolist()
     # Generate a list of GitHub Actions files
-    file_list = yaml_dataframe["File"].tolist()
+    file_list = yaml_dataframe["file"].tolist()
     # Generate a list of commit dates
-    date_list = source_code_dataframe["Date of Commit"].tolist()
+    date_list = source_code_dataframe["date"].tolist()
     # Generate a list of commit hashes
-    hash_list = source_code_dataframe["Commit Hash"].tolist()
+    hash_list = source_code_dataframe["hash"].tolist()
 
     # Iterate through list of source code trees and search for operators and operands
     for tree in abstract_trees_list:
@@ -171,18 +171,18 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
         distinct_operands = 0
 
     # Create a dictionary with Halstead metrics for a repository and each .yml file
-    halstead_dict["Hash"] = hash_list
-    halstead_dict["Date"] = date_list
-    halstead_dict["File"] = file_list
-    halstead_dict["Vocabulary"] = vocab_list
-    halstead_dict["Length"] = length_list
-    halstead_dict["Volume"] = volume_list
-    halstead_dict["Difficulty"] = difficulty_list
-    halstead_dict["Effort"] = effort_list
+    halstead_dict["hash"] = hash_list
+    halstead_dict["date"] = date_list
+    halstead_dict["file"] = file_list
+    halstead_dict["vocabulary"] = vocab_list
+    halstead_dict["length"] = length_list
+    halstead_dict["volume"] = volume_list
+    halstead_dict["difficulty"] = difficulty_list
+    halstead_dict["effort"] = effort_list
 
     # Create a pandas dataframe from Halstead metrics dictionary
     halstead_data = pd.DataFrame.from_dict(halstead_dict)
-    halstead_data.set_index("Date", inplace=True)
+    halstead_data.set_index("date", inplace=True)
 
     # plot = halstead_data.plot()
     # figure = plot.get_figure()
@@ -199,13 +199,13 @@ def determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe):
     complexity_dict = {}
 
     # Create a list of source code abstract syntax trees
-    abstract_trees_list = yaml_dataframe["Parse Status"].tolist()
+    abstract_trees_list = yaml_dataframe["parse_status"].tolist()
     # Create a list of files for a repo
-    file_list = yaml_dataframe["File"].tolist()
+    file_list = yaml_dataframe["file"].tolist()
     # Create a list of date of commits
-    date_list = source_code_dataframe["Date of Commit"].tolist()
+    date_list = source_code_dataframe["date"].tolist()
     # Generate a list of commit hashes
-    hash_list = source_code_dataframe["Commit Hash"].tolist()
+    hash_list = source_code_dataframe["hash"].tolist()
 
     # Iterate through abstract syntax trees and count complexity metrics
     for tree in abstract_trees_list:
@@ -263,13 +263,13 @@ def determine_cyclomatic_complexity(yaml_dataframe, source_code_dataframe):
         total_complexity_list.append(total_complexity)
 
     # Create a dictionary with cyclomatic complexity
-    complexity_dict["Hash"] = hash_list
-    complexity_dict["Date"] = date_list
-    complexity_dict["File"] = file_list
-    complexity_dict["Cyclomatic Complexity Score"] = total_complexity_list
+    complexity_dict["hash"] = hash_list
+    complexity_dict["date"] = date_list
+    complexity_dict["file"] = file_list
+    complexity_dict["cyclomatic_complexity"] = total_complexity_list
 
     complexity_data = pd.DataFrame.from_dict(complexity_dict)
-    complexity_data.set_index("Date", inplace=True)
+    complexity_data.set_index("date", inplace=True)
 
     # plot = complexity_data.plot()
     # figure = plot.get_figure()
@@ -288,13 +288,13 @@ def determine_raw_metrics(source_code_dataframe):
     raw_metrics_dict = {}
 
     # Generate a list of GitHub Actions source code
-    source_code_list = source_code_dataframe["Source Code"].tolist()
+    source_code_list = source_code_dataframe["source_code"].tolist()
     # Generate a list of files in a repository
-    file_list = source_code_dataframe["File"].tolist()
+    file_list = source_code_dataframe["file"].tolist()
     # Generate a list of dates of commits
-    date_list = source_code_dataframe["Date of Commit"].tolist()
+    date_list = source_code_dataframe["date"].tolist()
     # Generate a list of commit hashes
-    hash_list = source_code_dataframe["Commit Hash"].tolist()
+    hash_list = source_code_dataframe["hash"].tolist()
 
     # Iterate through the list of file source code
     for source_code in source_code_list:
@@ -319,14 +319,14 @@ def determine_raw_metrics(source_code_dataframe):
         ncss_ratio_list.append(ncss_ratio)
 
     # Create a dictionary with all raw metrics associated with a repository
-    raw_metrics_dict["Hash"] = hash_list
-    raw_metrics_dict["Date"] = date_list
-    raw_metrics_dict["File"] = file_list
-    raw_metrics_dict["Number of Comments"] = comments_list
-    raw_metrics_dict["LOC"] = lines_code
-    raw_metrics_dict["NCSS"] = lines_source_code
-    raw_metrics_dict["Comments to Total Lines Comparison"] = total_lines_ratio_list
-    raw_metrics_dict["Comments to Lines of Code Comparison"] = ncss_ratio_list
+    raw_metrics_dict["hash"] = hash_list
+    raw_metrics_dict["date"] = date_list
+    raw_metrics_dict["file"] = file_list
+    raw_metrics_dict["amount_commends"] = comments_list
+    raw_metrics_dict["loc"] = lines_code
+    raw_metrics_dict["ncss"] = lines_source_code
+    raw_metrics_dict["comments_loc_comparison] = total_lines_ratio_list
+    raw_metrics_dict["coments_ncss_comparison"] = ncss_ratio_list
 
     # Create a datarame with the raw metrics dictionary
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
@@ -342,24 +342,24 @@ def determine_raw_metrics(source_code_dataframe):
 def combine_metrics(halstead_data, complexity_data, raw_metrics_data):
     """Combine dataframes associated to Halstead metrics, Cyclomatic Complexity, and raw metrics."""
     # Create lists for all necessary metrics
-    cyclomatic_complexity = complexity_data["Cyclomatic Complexity Score"].tolist()
-    volume = halstead_data["Volume"].tolist()
-    vocab = halstead_data["Vocabulary"].tolist()
-    length = halstead_data["Length"].tolist()
-    difficulty = halstead_data["Difficulty"].tolist()
-    effort = halstead_data["Effort"].tolist()
+    cyclomatic_complexity = complexity_data["cyclomatic_complexity"].tolist()
+    volume = halstead_data["volume"].tolist()
+    vocab = halstead_data["vocabulary"].tolist()
+    length = halstead_data["length"].tolist()
+    difficulty = halstead_data["difficulty"].tolist()
+    effort = halstead_data["effort"].tolist()
 
     # Create a new pandas dataframe for combined data, started with raw metrics information
     combination = pd.DataFrame()
     combination = raw_metrics_data
 
     # Add cyclomatic complexity, and Halstead metrics to the combined dataframe
-    combination["Cyclomatic Complexity"] = cyclomatic_complexity
-    combination["Volume"] = volume
-    combination["Vocabulary"] = vocab
-    combination["Difficulty"] = difficulty
-    combination["Effort"] = effort
-    combination["Length"] = length
+    combination["cyclomatic_complexity"] = cyclomatic_complexity
+    combination["volume"] = volume
+    combination["vocabulary"] = vocab
+    combination["difficulty"] = difficulty
+    combination["effort"] = effort
+    combination["length"] = length
 
     return combination
 
@@ -372,21 +372,21 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
     maintainability_dict = {}
 
     # Create a list of files in a repository
-    file_list = complete_dataframe["File"].tolist()
+    file_list = complete_dataframe["file"].tolist()
     # Create a list of commit dates for a repository
-    date_list = source_code_dataframe["Date of Commit"].tolist()
+    date_list = source_code_dataframe["date"].tolist()
     # Generate a list of commit hashes
-    hash_list = source_code_dataframe["Commit Hash"].tolist()
+    hash_list = source_code_dataframe["hash"].tolist()
 
     # Set the index of the complete dataframe
     index = complete_dataframe.index
 
     # Iterate through the complete dataframe to gather Volume, Cyclomatic Complexity, NCSS and Number of Comments
     for index, row in complete_dataframe.iterrows():
-        v = row["Volume"]
-        cc = row["Cyclomatic Complexity"]
-        ncss = row["NCSS"]
-        c = row["Number of Comments"]
+        v = row["volume"]
+        cc = row["cyclomatic_complexity"]
+        ncss = row["ncss"]
+        c = row["amount_comments"]
 
         # Calculate three different maintainability indexes
         if v != "NaN":
@@ -417,14 +417,14 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
             vs_maintainability_list.append("NaN")
 
     # Create a dictionary with maintainability indexes
-    maintainability_dict["Hash"] = hash_list
-    maintainability_dict["Date"] = date_list
-    maintainability_dict["File"] = file_list
+    maintainability_dict["hash"] = hash_list
+    maintainability_dict["date"] = date_list
+    maintainability_dict["file"] = file_list
     maintainability_dict[
-        "Original Maintainability Index"
+        "original_mi"
     ] = original_maintainability_list
-    maintainability_dict["SEI Maintainability Index"] = sei_maintainability_list
-    maintainability_dict["Microsoft Maintainability Index"] = vs_maintainability_list
+    maintainability_dict["sei_mi"] = sei_maintainability_list
+    maintainability_dict["microsoft_mi"] = vs_maintainability_list
 
     # Create a pandas dataframe from a maintainability dictionary
     maintainability_data = pd.DataFrame.from_dict(maintainability_dict)
@@ -443,14 +443,14 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
 def combine_with_maintainability(complete_dataframe, maintainability_data):
     """Create a final complete dataframe with all complexity measures."""
     # Put maintainability indexes in a list
-    original = maintainability_data["Original Maintainability Index"].tolist()
-    sei = maintainability_data["SEI Maintainability Index"].tolist()
-    microsoft = maintainability_data["Microsoft Maintainability Index"].tolist()
+    original = maintainability_data["original_mi"].tolist()
+    sei = maintainability_data["sei_mi"].tolist()
+    microsoft = maintainability_data["microsoft_mi"].tolist()
 
     # Add maintianability indexes to the dataframe with Halstead, SLOC and Cyclomatic Complexity metrics
-    complete_dataframe["Origianl Maintainability Index"] = original
-    complete_dataframe["SEI Maintainability Index"] = sei
-    complete_dataframe["Microsoft Maintainability Index"] = microsoft
+    complete_dataframe["original_mi"] = original
+    complete_dataframe["sei_mi"] = sei
+    complete_dataframe["microsoft_mi"] = microsoft
 
     # plot = complete_dataframe.plot()
     # figure = plot.get_figure()
