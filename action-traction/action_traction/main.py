@@ -32,7 +32,7 @@ def determine_diffs(directory: str):
 
 
 @app.command()
-def determine_quality(directory_path: str):
+def determine_complexity(directory_path: str):
     """Generate a quality score for GitHub Actions files."""
     complexity.iterate_through_directory(directory_path)
 
