@@ -27,10 +27,10 @@ def determine_file_contents(repository_path: str):
                 repository_path_list.append(repository_path)
 
                 # Create a dictionary of all repo information and its source code
-                source_code_dict["Repository"] = [repository_path]
-                source_code_dict["File"] = [modification.new_path]
-                source_code_dict["Source Code"] = modification.source_code
-                source_code_dict["Date of Commit"] = commit.committer_date
+                source_code_dict["repo"] = [repository_path]
+                source_code_dict["file"] = [modification.new_path]
+                source_code_dict["source_code"] = modification.source_code
+                source_code_dict["date"] = commit.committer_date
                 code_dataframe = pd.DataFrame.from_dict(source_code_dict)
                 dataframe_list.append(code_dataframe)
 
@@ -66,7 +66,7 @@ def iterate_through_directory(root_directory: str):
 def generate_abstract_syntax_trees(source_code_dataframe):
     """Generate the abstract syntax trees of GitHub Actions configurations source code."""
     yaml_list = []
-    source_code_list = source_code_dataframe["Source Code"].tolist()
+    source_code_list = source_code_dataframe["source_code"].tolist()
     for source_code in source_code_list:
         if source_code is not None:
             try:
@@ -76,7 +76,7 @@ def generate_abstract_syntax_trees(source_code_dataframe):
                 yaml_list.append("Cannot Parse")
         else:
             yaml_list.append("No file contents")
-    source_code_dataframe["Parse Status"] = yaml_list
+    source_code_dataframe["parse_status"] = yaml_list
     yaml_dataframe = source_code_dataframe
 
     return yaml_dataframe
@@ -93,8 +93,8 @@ def determine_files_per_repo(initial_data, repository_set):
     """Determine the GitHub Actions files for each repository."""
     repo_file_dict = {}
     for repository in repository_set:
-        new_data = initial_data.loc[initial_data["Repository"] == repository]
-        file_list = new_data["File"].tolist()
+        new_data = initial_data.loc[initial_data["repo"] == repository]
+        file_list = new_data["file"].tolist()
         file_set = set(file_list)
         repo_file_dict[repository] = file_set
     return repo_file_dict
@@ -108,15 +108,15 @@ def determine_steps_run(yaml_data, repo_file_dict):
     steps_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["File"] == file]
-            yaml_list = new_data["Parse Status"].tolist()
+            new_data = yaml_data.loc[yaml_data["file"] == file]
+            yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 steps_run = nested_lookup("uses", parse_tree)
-                steps_run_dict["Repository"] = [repo]
-                steps_run_dict["File"] = [file]
-                steps_run_dict["Step Name"] = [steps_run]
-                steps_run_dict["Amount of Steps"] = [len(steps_run)]
+                steps_run_dict["repo"] = [repo]
+                steps_run_dict["file"] = [file]
+                steps_run_dict["defined_action"] = [steps_run]
+                steps_run_dict["amount_actions"] = [len(steps_run)]
 
                 initial_data = pd.DataFrame.from_dict(steps_run_dict)
                 dataframe_list.append(initial_data)
@@ -135,15 +135,15 @@ def determine_runs(yaml_data, repo_file_dict):
     runs_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["File"] == file]
-            yaml_list = new_data["Parse Status"].tolist()
+            new_data = yaml_data.loc[yaml_data["file"] == file]
+            yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_command = nested_lookup("run", parse_tree)
-                runs_dict["Repository"] = [repo]
-                runs_dict["File"] = [file]
-                runs_dict["Run Command"] = [defined_command]
-                runs_dict["Amount of Defined Commands"] = [len(defined_command)]
+                runs_dict["repo"] = [repo]
+                runs_dict["file"] = [file]
+                runs_dict["specified_command"] = [defined_command]
+                runs_dict["amount_commands"] = [len(defined_command)]
 
                 initial_data = pd.DataFrame.from_dict(runs_dict)
                 dataframe_list.append(initial_data)
@@ -162,15 +162,15 @@ def determine_operating_systems(yaml_data, repo_file_dict):
     operating_systems_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["File"] == file]
-            yaml_list = new_data["Parse Status"].tolist()
+            new_data = yaml_data.loc[yaml_data["file"] == file]
+            yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_os = nested_lookup("os", parse_tree)
-                operating_systems_dict["Repository"] = [repo]
-                operating_systems_dict["File"] = [file]
-                operating_systems_dict["Operating Systems Used"] = [defined_os]
-                operating_systems_dict["Amount of Operating Systems"] = [
+                operating_systems_dict["repo"] = [repo]
+                operating_systems_dict["file"] = [file]
+                operating_systems_dict["operating_systems"] = [defined_os]
+                operating_systems_dict["amount_os"] = [
                     len(defined_os)
                 ]
 
@@ -191,15 +191,15 @@ def determine_environments(yaml_data, repo_file_dict):
     environments_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["File"] == file]
-            yaml_list = new_data["Parse Status"].tolist()
+            new_data = yaml_data.loc[yaml_data["file"] == file]
+            yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_environments = nested_lookup("env", parse_tree)
-                environments_dict["Repository"] = [repo]
-                environments_dict["File"] = [file]
-                environments_dict["Environments Used"] = [defined_environments]
-                environments_dict["Amount of Environments"] = [
+                environments_dict["repo"] = [repo]
+                environments_dict["file"] = [file]
+                environments_dict["environments"] = [defined_environments]
+                environments_dict["amount_envs"] = [
                     len(defined_environments)
                 ]
 
@@ -221,16 +221,16 @@ def determine_languages(yaml_data, repo_file_dict):
     languages_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["File"] == file]
-            yaml_list = new_data["Parse Status"].tolist()
+            new_data = yaml_data.loc[yaml_data["file"] == file]
+            yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_languages = nested_lookup(regex, parse_tree)
                 print(defined_languages)
-                languages_dict["Repository"] = [repo]
-                languages_dict["File"] = [file]
-                languages_dict["Languages Used"] = [defined_languages]
-                languages_dict["Amount of Languages"] = [len(defined_languages)]
+                languages_dict["repo"] = [repo]
+                languages_dict["file"] = [file]
+                languages_dict["languages"] = [defined_languages]
+                languages_dict["amount_languages"] = [len(defined_languages)]
 
                 initial_data = pd.DataFrame.from_dict(languages_dict)
                 dataframe_list.append(initial_data)
@@ -248,10 +248,10 @@ def popularity_helper(specified_data, identifier):
     repo_count = 0
     popularity_dict = {}
     # Generate set of repositories
-    total_repositories = specified_data["Repository"].tolist()
+    total_repositories = specified_data["repo"].tolist()
     individual_repos = set(total_repositories)
     for repo in individual_repos:
-        new_data = specified_data.loc[specified_data["Repository"] == repo]
+        new_data = specified_data.loc[specified_data["repo"] == repo]
         identifier_list = new_data[identifier].tolist()
         if identifier_list is not None:
             repo_count = repo_count + 1
@@ -271,13 +271,13 @@ def popularity_helper(specified_data, identifier):
 
 def determine_steps_popularity(steps_dataframe):
     """Determine popularity of defined GitHub Actions."""
-    popular_steps = popularity_helper(steps_dataframe, "Step Name")
+    popular_steps = popularity_helper(steps_dataframe, "defined_action")
     return popular_steps
 
 
 def determine_runs_popularity(runs_dataframe):
     """Determine popularity of specified commands."""
-    popular_runs = popularity_helper(runs_dataframe, "Run Command")
+    popular_runs = popularity_helper(runs_dataframe, "specified_command")
     return popular_runs
 
 
@@ -304,52 +304,24 @@ def contents_over_time(directory):
     # languages = determine_languages(yaml_data, repo_file_dict) # Regular expression not currently working
 
     complete_dataframe = steps_dataframe
-    steps_list = steps_dataframe["Step Name"].tolist()
-    step_amount_list = steps_dataframe["Amount of Steps"].tolist()
-    commands_list = commands_dataframe["Run Command"].tolist()
-    commands_amount_list = commands_dataframe["Amount of Defined Commands"].tolist()
-    os_list = operating_systems["Operating Systems Used"].tolist()
-    os_amount_list = operating_systems["Amount of Operating Systems"].tolist()
-    env_list = environments["Environments Used"].tolist()
-    env_amount_list = environments["Amount of Environments"]
+    steps_list = steps_dataframe["defined_action"].tolist()
+    step_amount_list = steps_dataframe["amount_actions"].tolist()
+    commands_list = commands_dataframe["specified_command"].tolist()
+    commands_amount_list = commands_dataframe["amount_commands"].tolist()
+    os_list = operating_systems["operating_systems"].tolist()
+    os_amount_list = operating_systems["amount_os"].tolist()
+    env_list = environments["environments"].tolist()
+    env_amount_list = environments["amount_envs"]
 
-    complete_dataframe["Existing Actions"] = steps_list
-    complete_dataframe["Amount Existing Actions"] = step_amount_list
-    complete_dataframe["Defined Commands"] = commands_list
-    complete_dataframe["Amount Defined Commands"] = commands_amount_list
-    complete_dataframe["OS"] = os_list
-    complete_dataframe["Amount OS"] = os_amount_list
-    complete_dataframe["Environments"] = env_list
-    complete_dataframe["Amount Environments"] = env_amount_list
+    complete_dataframe["defined_action"] = steps_list
+    complete_dataframe["amount_action"] = step_amount_list
+    complete_dataframe["specified_command"] = commands_list
+    complete_dataframe["amount_commands"] = commands_amount_list
+    complete_dataframe["operating_systems"] = os_list
+    complete_dataframe["amount_os"] = os_amount_list
+    complete_dataframe["environments"] = env_list
+    complete_dataframe["amount_envs"] = env_amount_list
 
     complete_dataframe_path = directory + "/fileContentsAnalysis.csv"
     complete_dataframe.to_csv(complete_dataframe_path)
     return complete_dataframe
-
-
-def perform_specified_analysis(directory, specified_metrics):
-    """Perform specified analysis based on user definition."""
-    source_code_data = iterate_through_directory(directory)
-    repo_set = determine_repositories(source_code_data)
-    repo_file_dict = determine_files_per_repo(source_code_data, repo_set)
-    yaml_data = generate_abstract_syntax_trees(source_code_data)
-
-    if "Actions" in specified_metrics:
-        steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
-        popular_steps = determine_steps_popularity(steps_dataframe)
-        print(steps_dataframe)
-        print(popular_steps)
-    if "Commands" in specified_metrics:
-        commands_dataframe = determine_runs(yaml_data, repo_file_dict)
-        popular_commands = determine_runs_popularity(commands_dataframe)
-        print(commands_dataframe)
-        print(popular_commands)
-    if "Setup" in specified_metrics:
-        operating_systems = determine_operating_systems(yaml_data, repo_file_dict)
-        environments = determine_environments(yaml_data, repo_file_dict)
-        languages = determine_languages(
-            yaml_data, repo_file_dict
-        )  # Regular expression not currently working
-        print(operating_systems)
-        print(environments)
-        print(languages)
