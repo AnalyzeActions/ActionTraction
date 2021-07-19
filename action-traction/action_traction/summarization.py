@@ -9,7 +9,7 @@ import datetime
 def determine_repositories(initial_data):
     """Find each repository in the complete dataset of repository information."""
     # Create a list of all repositories
-    repository_list = initial_data["Repository"].tolist()
+    repository_list = initial_data["repo"].tolist()
     # Find each unique repository name return the set
     repository_set = set(repository_list)
 
@@ -23,7 +23,7 @@ def determine_files_per_repo(initial_data, repository_set):
     # Iterate through each unique repository name in the set
     for repository in repository_set:
         # Create a new dataset for each unique repository
-        new_data = initial_data.loc[initial_data["Repository"] == repository]
+        new_data = initial_data.loc[initial_data["repo"] == repository]
         # Make a list of each of the files for a unique repository
         file_list = new_data["file"].tolist()
         # Determine each unique GitHub Actions file associated with a repository
@@ -257,59 +257,6 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
     return committer_dataframe
 
 
-# TODO: Create functionality for multiple repos in dataset
-def contributors_enitre_repo(directory, entire_repo_data, repo_set):
-    """Determine the total contributors to a GitHub repository."""
-    author_contributions_list = []
-    percent_contributions = []
-    contribution_data = pd.DataFrame()
-    contributor_dictionary = {}
-    repository_list = []
-    all_authors = []
-    dataframe_list = []
-
-    for repo in repo_set:
-        print(repo)
-        new_data = entire_repo_data.loc[entire_repo_data["Repository"] == repo]
-
-        # Determine all authors of commits in a repository
-        author_list = new_data["author"].tolist()
-        # Determine each unique author for a GitHub repository
-        author_set = set(author_list)
-
-        print(author_set)
-
-        # Iterate through all unique authors and determine contribution
-        for author in author_set:
-            # Count how many commits an author is associated with in a repo
-            author_contribution = author_list.count(author)
-            # Calculate percentage of contribution based on commits
-            author_percentage_contribution = ((author_contribution) / (len(author_list))) * 100
-
-            author_contributions_list.append(author_contribution)
-            percent_contributions.append(author_percentage_contribution)
-
-            repository_list.append(repo)
-            all_authors.append(author)
-
-        # Create a dictionary for committer summary stats
-        contributor_dictionary["repo"] = repository_list
-        contributor_dictionary["contributor"] = all_authors
-        contributor_dictionary["contributor_commits"] = author_contributions_list
-        contributor_dictionary["committer_contribution"] = percent_contributions
-
-        # Create a dataframe from committer summary stats dictionary for each repo
-        initial_dataframe = pd.DataFrame.from_dict(
-            contributor_dictionary, orient="columns"
-        )
-        dataframe_list.append(initial_dataframe)
-
-    for data in dataframe_list:
-        contribution_data = contribution_data.append(data)
-
-    return contribution_data
-
-
 def calculate_lines_added_metrics(initial_data, repo_file_dict):
     """Determine summary statistics relating to lines added in a GitHub Actions file."""
     added_dictionary = {}
@@ -486,6 +433,105 @@ def determine_contributors(directory: str):
     complete_dataframe.to_csv(contribution_path)
 
     return complete_dataframe
+
+
+def contributors_enitre_repo(entire_repo_data, repo_set):
+    """Determine the total contributors to a GitHub repository."""
+    author_contributions_list = []
+    percent_contributions = []
+    contribution_data = pd.DataFrame()
+    contributor_dictionary = {}
+    repository_list = []
+    all_authors = []
+    dataframe_list = []
+
+    for repo in repo_set:
+        new_data = entire_repo_data.loc[entire_repo_data["repo"] == repo]
+
+        # Determine all authors of commits in a repository
+        author_list = new_data["author"].tolist()
+        # Determine each unique author for a GitHub repository
+        author_set = set(author_list)
+
+
+        # Iterate through all unique authors and determine contribution
+        for author in author_set:
+            # Count how many commits an author is associated with in a repo
+            author_contribution = author_list.count(author)
+            # Calculate percentage of contribution based on commits
+            author_percentage_contribution = ((author_contribution) / (len(author_list))) * 100
+
+            author_contributions_list.append(author_contribution)
+            percent_contributions.append(author_percentage_contribution)
+
+            repository_list.append(repo)
+            all_authors.append(author)
+
+        # Create a dictionary for committer summary stats
+        contributor_dictionary["repo"] = repository_list
+        contributor_dictionary["contributor"] = all_authors
+        contributor_dictionary["contributor_commits"] = author_contributions_list
+        contributor_dictionary["committer_contribution"] = percent_contributions
+
+        # Create a dataframe from committer summary stats dictionary for each repo
+        initial_dataframe = pd.DataFrame.from_dict(
+            contributor_dictionary, orient="columns"
+        )
+        dataframe_list.append(initial_dataframe)
+
+    for data in dataframe_list:
+        contribution_data = contribution_data.append(data)
+
+    return contribution_data
+
+
+def determine_all_files(entire_csv: str):
+    files_changed_dict = {}
+    dataframe_list = []
+    final_dataframe = pd.DataFrame()
+    all_commits_repo = pd.read_csv(entire_csv)
+
+    hash_list = all_commits_repo["hash"].tolist()
+    hash_set = set(hash_list)
+    repository_list = all_commits_repo["repo"].tolist()
+    repository_set = set(repository_list)
+
+    for repo in repository_set:
+        first_dataset = all_commits_repo.loc[all_commits_repo["repo"] == repo]
+        for unique_hash in hash_set:
+            new_data = first_dataset.loc[first_dataset["hash"] == unique_hash]
+            files_changed_per_commit = new_data["files_changed"].tolist()
+            # files_changed_dict[unique_hash] = files_changed_per_commit
+
+            files_changed_dict["repo"] = repo
+            files_changed_dict["hash"] = unique_hash
+            files_changed_dict["files_changed"] = [files_changed_per_commit]
+
+            first_dataframe = pd.DataFrame.from_dict(files_changed_dict)
+
+            dataframe_list.append(first_dataframe)
+    
+    for data in dataframe_list:
+        final_dataframe = final_dataframe.append(data)
+    
+    return final_dataframe
+
+
+def entire_repo_metrics(directory: str):
+    csv_path = directory + "/entireRepo.csv"
+    initial_data = pd.read_csv(csv_path)
+    repository_set = determine_repositories(initial_data)
+
+    repo_commits = pd.read_csv(csv_path)
+
+    contribution_data = contributors_enitre_repo(repo_commits, repository_set)
+    files_changed = determine_all_files(csv_path)
+
+    contributors_path = directory + "/entire_repo_contributors.csv"
+    contribution_data.to_csv(contributors_path)
+
+    files_path = directory + "/files_changed.csv"
+    files_changed.to_csv(files_path)
 
 
 def perform_specified_summarization(specified_metrics: List[str], directory: str):

@@ -22,7 +22,7 @@ def download(repositories: str, directory: Path):
 @app.command()
 def repository_metrics(directory: str):
     """Generate a .csv file for all given repositories."""
-    traverse_repos.iterate_through_directory(directory)
+    traverse.iterate_through_directory(directory)
 
 
 @app.command()
@@ -48,5 +48,7 @@ def contributors(directory_path: str):
     """Determine contributors for a repository and GitHub Actions.""" 
     summary.determine_contributors(directory_path)
 
-# @app.command()
-# def
+@app.command()
+def whole_repo():
+    """Determine metrics for every commit in a GitHub repository."""
+    summary.entire_repo_metrics("/home/mkapfhammer/Documents/test_traction")
