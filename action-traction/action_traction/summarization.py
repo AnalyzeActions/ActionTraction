@@ -486,6 +486,7 @@ def contributors_enitre_repo(entire_repo_data, repo_set):
 
 
 def determine_all_files(entire_csv: str):
+    """Determine what files were changed in each commit."""
     files_changed_dict = {}
     dataframe_list = []
     final_dataframe = pd.DataFrame()
@@ -515,50 +516,3 @@ def determine_all_files(entire_csv: str):
         final_dataframe = final_dataframe.append(data)
     
     return final_dataframe
-
-
-def entire_repo_metrics(directory: str):
-    csv_path = directory + "/entireRepo.csv"
-    initial_data = pd.read_csv(csv_path)
-    repository_set = determine_repositories(initial_data)
-
-    repo_commits = pd.read_csv(csv_path)
-
-    contribution_data = contributors_enitre_repo(repo_commits, repository_set)
-    files_changed = determine_all_files(csv_path)
-
-    contributors_path = directory + "/entire_repo_contributors.csv"
-    contribution_data.to_csv(contributors_path)
-
-    files_path = directory + "/files_changed.csv"
-    files_changed.to_csv(files_path)
-
-
-def perform_specified_summarization(specified_metrics: List[str], directory: str):
-    """Generate datasets based on user input."""
-    csv_path = directory + "/minedRepos.csv"
-    initial_data = pd.read_csv(csv_path)
-    repository_set = determine_repositories(initial_data)
-    repo_file_dict = determine_files_per_repo(initial_data, repository_set)
-
-    if "Modifiers" in specified_metrics:
-        author_results = calculate_author_metrics(initial_data, repo_file_dict)
-        committer_results = calculate_committer_metrics(initial_data, repo_file_dict)
-        print(author_results)
-        print(committer_results)
-    if "Size" in specified_metrics:
-        size_results = calculate_size_metrics(initial_data, repo_file_dict)
-        print(size_results)
-    if "Lifetime" in specified_metrics:
-        lifetime_results = calculate_file_lifetime(initial_data, repo_file_dict)
-        print(lifetime_results)
-    if "Diff" in specified_metrics:
-        added_results = calculate_lines_added_metrics(initial_data, repo_file_dict)
-        removed_results = calculate_lines_removed_metrics(initial_data, repo_file_dict)
-        print(added_results)
-        print(removed_results)
-    if "Messages" in specified_metrics:
-        messages_results = calculate_commit_message_metrics(
-            initial_data, repo_file_dict
-        )
-        print(messages_results)
