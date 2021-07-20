@@ -5,6 +5,12 @@ import pandas as pd
 import os
 import pathlib
 
+from rich.console import Console
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TimeRemainingColumn
+from rich.progress import TimeElapsedColumn
+
 
 def generate_file_list(repository_path: str):
     """Generate a list of .yml files in a repository."""
@@ -147,15 +153,43 @@ def iterate_through_directory(root_directory: str):
         entire_repo_data = iterate_entire_repo(str(path))
         # Create a list of entire repo dataframes
         entire_repo_list.append(entire_repo_data)
+    
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        # Create a comprehensive dataframe with individual repo dataframes
+        actions_progress = progress.add_task("Generate Metrics for GitHub Actions", total=len(dataframes_list))
+        for initial_data in dataframes_list:
+            final_dataframe = final_dataframe.append(initial_data)
+            progress.update(actions_progress, advance=1)
 
-    # Create a comprehensive dataframe with individual repo dataframes
-    for initial_data in dataframes_list:
-        final_dataframe = final_dataframe.append(initial_data)
-
-    # Create a comprehensive dataframe with the entire repo dataframes
-    for dataframe in entire_repo_list:
-        entire_repo_dataframe = entire_repo_dataframe.append(dataframe)
-
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        repo_progress = progress.add_task("Generate Metrics for Entire Repo", total=len(entire_repo_list))
+        # Create a comprehensive dataframe with the entire repo dataframes
+        for dataframe in entire_repo_list:
+            entire_repo_dataframe = entire_repo_dataframe.append(dataframe)
+            progress.update(repo_progress, advance=1)
+    
     # Put dataframe information into a .csv file
     csv_path = root_directory + "/minedRepos.csv"
     entire_repo_path = root_directory + "/entireRepo.csv"
