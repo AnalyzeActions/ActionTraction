@@ -8,55 +8,24 @@ import math
 import pathlib
 import os
 
-
-def determine_file_contents(repository_path: str):
-    """Determine the GitHub Actions files in a given repository."""
-    actions_files = []
-    source_code_dict = {}
-    dataframe_list = []
-    file_name_list = []
-    repository_path_list = []
-    source_code_dataframe = pd.DataFrame()
-
-    # Traverse the all of the commits in a given repository
-    for commit in Repository(repository_path).traverse_commits():
-        # Look at all commits with modified fiels
-        for modification in commit.modified_files:
-            # Drill repository for all commits where the GitHub Actions files were modified
-            if ".github/workflows" in str(modification.new_path):
-                actions_files.append(modification.source_code)
-                file_name_list.append(modification.new_path)
-                repository_path_list.append(repository_path)
-
-                # Create a dictionary relating to source code of GitHub Actions file
-                source_code_dict["hash"] = commit.hash
-                source_code_dict["repo"] = [repository_path]
-                source_code_dict["file"] = [modification.new_path]
-                source_code_dict["source_code"] = modification.source_code
-                source_code_dict["date"] = commit.committer_date
-
-                # Create a dataframe from the existing source code dictionary
-                code_dataframe = pd.DataFrame.from_dict(source_code_dict)
-                dataframe_list.append(code_dataframe)
-
-    # Create a dataframe for entire repo and every file with source code
-    for result in dataframe_list:
-        source_code_dataframe = source_code_dataframe.append(result)
-
-    return source_code_dataframe
+from action_traction import constants
+from rich.console import Console
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TimeRemainingColumn
+from rich.progress import TimeElapsedColumn
 
 
 def generate_abstract_syntax_trees(source_code_dataframe):
     """Generate abstract syntax trees from the source code of GitHub Actions files."""
     yaml_list = []
-
     # Generate a list of GitHub Actions source code
     source_code_list = source_code_dataframe["source_code"].tolist()
     # Iterate through list of source code and convert to abstract syntax tree
     for source_code in source_code_list:
         if source_code is not None:
             try:
-                parsed_yaml = yaml.safe_load(source_code)
+                parsed_yaml = yaml.safe_load(str(source_code))
                 yaml_list.append(parsed_yaml)
             except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
                 # Possible structure errors cause inability to parse for syntax tree generation
@@ -299,6 +268,7 @@ def determine_raw_metrics(source_code_dataframe):
     # Iterate through the list of file source code
     for source_code in source_code_list:
         # Count the number of comments in a GitHub Actions file
+        source_code = str(source_code)
         number_comments = source_code.count("#")
         comments_list.append(number_comments)
 
@@ -463,9 +433,10 @@ def combine_with_maintainability(complete_dataframe, maintainability_data):
 def iterate_through_directory(root_directory: str):
     """Generate a comprehensive dataframe of metrics for each repository in a specified directory."""
     save_path = root_directory + "/complexity.csv"
-    print(save_path)
+
     repos_to_check = []
     dataframes_list = []
+    source_code_dataframe = pd.DataFrame()
     complexity_dataframe = pd.DataFrame()
     final_dataframe = pd.DataFrame()
 
@@ -473,30 +444,46 @@ def iterate_through_directory(root_directory: str):
     for subdir, dirs, files in os.walk(root_directory):
         repos_to_check.append(dirs)
 
-    # Iterate through each repository and perform methods to generate complexity scores
-    for repository in repos_to_check[0]:
-        path = pathlib.Path.home() / root_directory / repository
-        source_code_dataframe = determine_file_contents(str(path))
-        yaml_dataframe = generate_abstract_syntax_trees(source_code_dataframe)
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        generate_complexity = progress.add_task("Determining Complexity", total=len(repos_to_check[0]))
+        # Iterate through each repository and perform methods to generate complexity scores
+        for repository in repos_to_check[0]:
+            path = pathlib.Path.home() / root_directory / repository
+            mined_repo_path = root_directory + "/minedRepos.csv"
+            source_code_dataframe = pd.read_csv(mined_repo_path)
+            print(type(source_code_dataframe))
+            yaml_dataframe = generate_abstract_syntax_trees(source_code_dataframe)
 
-        halstead_data = determine_halstead_metrics(
-            yaml_dataframe, source_code_dataframe
-        )
-        complexity_data = determine_cyclomatic_complexity(
-            yaml_dataframe, source_code_dataframe
-        )
-        raw_metrics_data = determine_raw_metrics(source_code_dataframe)
-        combined_data = combine_metrics(
-            halstead_data, complexity_data, raw_metrics_data
-        )
-        maintainability_data = calculate_maintainability(
-            combined_data, source_code_dataframe
-        )
-        complexity_dataframe = combine_with_maintainability(
-            combined_data, maintainability_data
-        )
-        # Add each repository-specific dataframe to a list
-        dataframes_list.append(complexity_dataframe)
+            halstead_data = determine_halstead_metrics(
+                yaml_dataframe, source_code_dataframe
+            )
+            complexity_data = determine_cyclomatic_complexity(
+                yaml_dataframe, source_code_dataframe
+            )
+            raw_metrics_data = determine_raw_metrics(source_code_dataframe)
+            combined_data = combine_metrics(
+                halstead_data, complexity_data, raw_metrics_data
+            )
+            maintainability_data = calculate_maintainability(
+                combined_data, source_code_dataframe
+            )
+            complexity_dataframe = combine_with_maintainability(
+                combined_data, maintainability_data
+            )
+            # Add each repository-specific dataframe to a list
+            dataframes_list.append(complexity_dataframe)
+            progress.update(generate_complexity, advance=1)
 
     # Create a comprehensive dataframe with individual repo dataframes
     for initial_data in dataframes_list:
