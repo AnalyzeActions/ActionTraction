@@ -31,7 +31,7 @@ def determine_actions_files(modified_files: List[str]):
     # Iterate through list of modified files
     for file in modified_files:
         # Determine if the file is a GitHub Actions workflow file
-        if ".github" in str(file):
+        if ".github/workflows" in str(file):
             # If Action file, add to a specific list of files to analyze
             if files_to_analyze.count(str(file)) == 0:
                 files_to_analyze.append(str(file))

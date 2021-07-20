@@ -23,7 +23,7 @@ def determine_file_contents(repository_path: str):
         # Look at all commits with modified fiels
         for modification in commit.modified_files:
             # Drill repository for all commits where the GitHub Actions files were modified
-            if ".github" in str(modification.new_path):
+            if ".github/workflows" in str(modification.new_path):
                 actions_files.append(modification.source_code)
                 file_name_list.append(modification.new_path)
                 repository_path_list.append(repository_path)
