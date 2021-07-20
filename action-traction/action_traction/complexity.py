@@ -322,7 +322,7 @@ def determine_raw_metrics(source_code_dataframe):
     raw_metrics_dict["hash"] = hash_list
     raw_metrics_dict["date"] = date_list
     raw_metrics_dict["file"] = file_list
-    raw_metrics_dict["amount_commends"] = comments_list
+    raw_metrics_dict["amount_comments"] = comments_list
     raw_metrics_dict["loc"] = lines_code
     raw_metrics_dict["ncss"] = lines_source_code
     raw_metrics_dict["comments_loc_comparison"] = total_lines_ratio_list
@@ -330,7 +330,7 @@ def determine_raw_metrics(source_code_dataframe):
 
     # Create a datarame with the raw metrics dictionary
     raw_metrics_data = pd.DataFrame.from_dict(raw_metrics_dict)
-    raw_metrics_data.set_index("Date", inplace=True)
+    raw_metrics_data.set_index("date", inplace=True)
 
     # plot = raw_metrics_data.plot()
     # figure = plot.get_figure()
@@ -430,7 +430,7 @@ def calculate_maintainability(complete_dataframe, source_code_dataframe):
     maintainability_data = pd.DataFrame.from_dict(maintainability_dict)
 
     # Set the index of the pandas dataframe to be the date of commit
-    maintainability_data.set_index("Date", inplace=True)
+    maintainability_data.set_index("date", inplace=True)
 
     # plot = maintainability_data.plot()
     # figure = plot.get_figure()
@@ -462,6 +462,8 @@ def combine_with_maintainability(complete_dataframe, maintainability_data):
 
 def iterate_through_directory(root_directory: str):
     """Generate a comprehensive dataframe of metrics for each repository in a specified directory."""
+    save_path = root_directory + "/complexity.csv"
+    print(save_path)
     repos_to_check = []
     dataframes_list = []
     complexity_dataframe = pd.DataFrame()
@@ -500,4 +502,4 @@ def iterate_through_directory(root_directory: str):
     for initial_data in dataframes_list:
         final_dataframe = final_dataframe.append(initial_data)
 
-    return final_dataframe
+    final_dataframe.to_csv(save_path)
