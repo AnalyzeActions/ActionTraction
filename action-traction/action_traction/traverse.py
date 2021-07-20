@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import pathlib
 
+from action_traction import constants
 from rich.console import Console
 from rich.progress import BarColumn
 from rich.progress import Progress
@@ -53,6 +54,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     repository_list = []
     size_bytes_list = []
     hash_list = []
+    source_code_list = []
     # Initialize dictionary for repository data
     raw_data = {}
     # Initialize pandas dataframes
@@ -62,20 +64,23 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
     for file in files_to_analyze:
         # Iterate through the commits of a repository where a GitHub Actions file was modified
         for commit in Repository(repository_path, filepath=file).traverse_commits():
-            # Create a complete path of the GitHub Actions file
-            complete_file = repository_path + "/" + file
+            for modification in commit.modified_files:
+                # Create a complete path of the GitHub Actions file
+                complete_file = repository_path + "/" + file
 
-            # Mine repository and add all metrics to corresponding list
-            hash_list.append(commit.hash)
-            file_list.append(file)
-            repository_list.append(repository_path)
-            author_list.append(commit.author.name)
-            committer_list.append(commit.committer.name)
-            date_list.append(commit.committer_date)
-            commit_messages_list.append(commit.msg)
-            size_bytes_list.append(os.stat(complete_file).st_size)
-            lines_added_list.append(commit.insertions)
-            lines_deleted_list.append(commit.deletions)
+                # Mine repository and add all metrics to corresponding list
+                hash_list.append(commit.hash)
+                file_list.append(file)
+                repository_list.append(repository_path)
+                author_list.append(commit.author.name)
+                committer_list.append(commit.committer.name)
+                date_list.append(commit.committer_date)
+                commit_messages_list.append(commit.msg)
+                size_bytes_list.append(os.stat(complete_file).st_size)
+                lines_added_list.append(commit.insertions)
+                lines_deleted_list.append(commit.deletions)
+
+                source_code_list.append(modification.source_code)
 
         # Create a dictionary for a repository and its corresponding metrics
         raw_data["hash"] = hash_list
@@ -88,6 +93,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
         raw_data["lines_added"] = lines_added_list
         raw_data["lines_removed"] = lines_deleted_list
         raw_data["date"] = date_list
+        raw_data["source_code"] = source_code_list
 
     # Create a pandas dictionary for repository dictionary
     first_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
@@ -141,54 +147,40 @@ def iterate_through_directory(root_directory: str):
     for subdir, dirs, files in os.walk(root_directory):
         repos_to_check.append(dirs)
 
-    # Iterate through each repository and perform methods to generate metrics
-    for repository in repos_to_check[0]:
-        path = pathlib.Path.home() / root_directory / repository
-        all_files_changed = generate_file_list(str(path))
-        actions_files = determine_actions_files(all_files_changed)
-        single_repo_dataframe = iterate_actions_files(str(path), actions_files)
-        # Add each repository-specific dataframe to a list
-        dataframes_list.append(single_repo_dataframe)
-        # Iterate through repositories and generate a dataframe with info from each commit
-        entire_repo_data = iterate_entire_repo(str(path))
-        # Create a list of entire repo dataframes
-        entire_repo_list.append(entire_repo_data)
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        generate_metrics = progress.add_task("Generating Repository Metrics", total=len(repos_to_check[0]))
+        # Iterate through each repository and perform methods to generate metrics
+        for repository in repos_to_check[0]:
+            path = pathlib.Path.home() / root_directory / repository
+            all_files_changed = generate_file_list(str(path))
+            actions_files = determine_actions_files(all_files_changed)
+            single_repo_dataframe = iterate_actions_files(str(path), actions_files)
+            # Add each repository-specific dataframe to a list
+            dataframes_list.append(single_repo_dataframe)
+            # Iterate through repositories and generate a dataframe with info from each commit
+            entire_repo_data = iterate_entire_repo(str(path))
+            # Create a list of entire repo dataframes
+            entire_repo_list.append(entire_repo_data)
+            progress.update(generate_metrics, advance=1)
     
-    with Progress(
-        constants.progress.Task_Format,
-        BarColumn(),
-        constants.progress.Percentage_Format,
-        constants.progress.Completed,
-        "•",
-        TimeElapsedColumn(),
-        "elapsed",
-        "•",
-        TimeRemainingColumn(),
-        "remaining",
-    ) as progress:
-        # Create a comprehensive dataframe with individual repo dataframes
-        actions_progress = progress.add_task("Generate Metrics for GitHub Actions", total=len(dataframes_list))
-        for initial_data in dataframes_list:
-            final_dataframe = final_dataframe.append(initial_data)
-            progress.update(actions_progress, advance=1)
+    # Create a comprehensive dataframe with individual repo dataframes
+    for initial_data in dataframes_list:
+        final_dataframe = final_dataframe.append(initial_data)
 
-    with Progress(
-        constants.progress.Task_Format,
-        BarColumn(),
-        constants.progress.Percentage_Format,
-        constants.progress.Completed,
-        "•",
-        TimeElapsedColumn(),
-        "elapsed",
-        "•",
-        TimeRemainingColumn(),
-        "remaining",
-    ) as progress:
-        repo_progress = progress.add_task("Generate Metrics for Entire Repo", total=len(entire_repo_list))
-        # Create a comprehensive dataframe with the entire repo dataframes
-        for dataframe in entire_repo_list:
-            entire_repo_dataframe = entire_repo_dataframe.append(dataframe)
-            progress.update(repo_progress, advance=1)
+    # Create a comprehensive dataframe with the entire repo dataframes
+    for dataframe in entire_repo_list:
+        entire_repo_dataframe = entire_repo_dataframe.append(dataframe)
     
     # Put dataframe information into a .csv file
     csv_path = root_directory + "/minedRepos.csv"
