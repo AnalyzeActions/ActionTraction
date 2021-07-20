@@ -6,11 +6,18 @@ import pathlib
 import os
 import git
 
+from action_traction import constants
+from rich.console import Console
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TimeRemainingColumn
+from rich.progress import TimeElapsedColumn
 
-def generate_save_path(repository_csv: str, save_path: Path):
+
+def generate_save_path(repository_csv: Path, save_path: Path):
     """Generate each path that a repo should be saved to based on its name."""
     final_repository_paths = []
-    converted_data = pd.read_csv(repository_csv)
+    converted_data = pd.read_csv(str(repository_csv))
     repository_list = converted_data["url"].tolist()
     for repo in repository_list:
         repo_name = os.path.splitext(os.path.basename(repo))[0]
@@ -21,12 +28,28 @@ def generate_save_path(repository_csv: str, save_path: Path):
     return final_repository_paths
 
 
-def download_https(repository_csv: str, path_list: List):
+def download_https(repository_csv: Path, path_list: List):
     """Download repositories using https URLs."""
-    converted_data = pd.read_csv(repository_csv)
+    converted_data = pd.read_csv(str(repository_csv))
     repository_links = converted_data["url"].tolist()
     count = 0
-    # Clone a remote repository using https
-    for x in range(0, len(repository_links)):
-        git.Repo.clone_from(repository_links[x], path_list[x])
-        count = count + 1
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        download_task = progress.add_task("Download", total=len(repository_links))
+        print("")
+        # Clone a remote repository using https
+        for x in range(0, len(repository_links)):
+            git.Repo.clone_from(repository_links[x], path_list[x])
+            count = count + 1
+            progress.update(download_task, advance = 1)
+        print("")
