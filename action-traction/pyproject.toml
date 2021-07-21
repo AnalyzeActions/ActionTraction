@@ -24,6 +24,7 @@ pydocstyle = "^6.1.1"
 pylint = "^2.9.3"
 black = "^21.6b0"
 rich = "^10.6.0"
+giturlparse = "^0.10.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

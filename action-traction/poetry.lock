@@ -144,6 +144,14 @@ python-versions = ">=3.5"
 gitdb = ">=4.0.1,<5"
 
 [[package]]
+name = "giturlparse"
+version = "0.10.0"
+description = "A Git URL parsing module (supports parsing and rewriting)"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "isort"
 version = "5.9.2"
 description = "A Python utility / library to sort Python imports."
@@ -561,7 +569,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "6eedd83dc3d871817f3700daed99f158ec5fb651bc20431cf953660ed358dcee"
+content-hash = "b656f1dad4b3c8804da5f6c1914be297f096446798a378802e77b852afdd964d"
 
 [metadata.files]
 appdirs = [
@@ -615,6 +623,10 @@ gitdb = [
 gitpython = [
     {file = "GitPython-3.1.17-py3-none-any.whl", hash = "sha256:29fe82050709760081f588dd50ce83504feddbebdc4da6956d02351552b1c135"},
     {file = "GitPython-3.1.17.tar.gz", hash = "sha256:ee24bdc93dce357630764db659edaf6b8d664d4ff5447ccfeedd2dc5c253f41e"},
+]
+giturlparse = [
+    {file = "giturlparse-0.10.0-py2.py3-none-any.whl", hash = "sha256:04ba1a3a099c3093fa8d24a422913c6a9b2c2cd22bcffc939cf72e3e98f672d7"},
+    {file = "giturlparse-0.10.0.tar.gz", hash = "sha256:2595ab291d30717cda8474b874c9fd509f1b9802ad7f6968c36a45e4b13eb337"},
 ]
 isort = [
     {file = "isort-5.9.2-py3-none-any.whl", hash = "sha256:eed17b53c3e7912425579853d078a0832820f023191561fcee9d7cae424e0813"},

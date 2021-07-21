@@ -13,6 +13,8 @@ from rich.progress import Progress
 from rich.progress import TimeRemainingColumn
 from rich.progress import TimeElapsedColumn
 
+from giturlparse import parse
+
 
 def generate_save_path(repository_csv: Path, save_path: Path):
     """Generate each path that a repo should be saved to based on its name."""
@@ -20,8 +22,18 @@ def generate_save_path(repository_csv: Path, save_path: Path):
     converted_data = pd.read_csv(str(repository_csv))
     repository_list = converted_data["url"].tolist()
     for repo in repository_list:
-        repo_name = os.path.splitext(os.path.basename(repo))[0]
-        path = pathlib.Path.home() / save_path / repo_name
+        if parse(repo).valid:
+            parsed_url = parse(repo)
+            organization = parsed_url.owner
+            repository_name = parsed_url.repo
+        # else:
+        #     organization = None
+        #     repository_name = None
+
+        repository_definition = organization + "." + repository_name
+        
+        path = pathlib.Path.home() / save_path / repository_definition
+
         final_repository_paths.append(str(path))
 
     # print(final_repository_paths)
