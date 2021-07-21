@@ -32,7 +32,7 @@ def determine_actions_files(modified_files: List[str]):
     # Iterate through list of modified files
     for file in modified_files:
         # Determine if the file is a GitHub Actions workflow file
-        if ".github/workflows" in str(file):
+        if ".github/workflows" in str(file) and ".yml" in str(file): #TODO: And .yml extension 
             # If Action file, add to a specific list of files to analyze
             if files_to_analyze.count(str(file)) == 0:
                 files_to_analyze.append(str(file))
@@ -70,7 +70,7 @@ def iterate_actions_files(repository_path: str, files_to_analyze: List[str]):
 
                 # Mine repository and add all metrics to corresponding list
                 hash_list.append(commit.hash)
-                file_list.append(file)
+                file_list.append(modification.filename)
                 repository_list.append(repository_path)
                 author_list.append(commit.author.name)
                 committer_list.append(commit.committer.name)
