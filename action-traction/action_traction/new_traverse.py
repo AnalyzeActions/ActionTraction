@@ -2,6 +2,7 @@ from pydriller import Repository
 import pandas as pd
 import os
 import pathlib
+from ordered_set import OrderedSet
 
 def traverse_all_commits(repository_path: str):
     hash_list = []
@@ -13,6 +14,7 @@ def traverse_all_commits(repository_path: str):
     size_list = []
     lines_added_list = []
     lines_removed_list = []
+    source_code_list = []
 
     raw_data = {}
 
@@ -25,10 +27,11 @@ def traverse_all_commits(repository_path: str):
             repository_list.append(repository_path)
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
-            files_changed_list.append(modification.filename)
+            files_changed_list.append(modification.new_path)
             # size_list.append(os.stat(complete_file).st_size)
             lines_added_list.append(commit.insertions)
             lines_removed_list.append(commit.deletions)
+            source_code_list.append(modification.source_code)
         
     raw_data["hash"] = hash_list
     raw_data["date"] = date_list
@@ -67,3 +70,54 @@ def iterate_through_directory(root_directory: str):
 
     final_dataframe.to_csv(csv_path)
 
+
+def create_intermediate_dataframe(all_commit_csv: str):
+    all_commits_dataframe = pd.read_csv(all_commit_csv)
+
+    hash_list = all_commits_dataframe["hash"].tolist()
+    hash_set = OrderedSet(hash_list)
+
+    intermediate_dict = {}
+    yes_gha = []
+    hash_list = []
+    gha_list = []
+    present_list = []
+
+    present = False
+
+    for unique_hash in hash_set:
+        raw_data = all_commits_dataframe.loc[all_commits_dataframe["hash"] == unique_hash]
+        files_changed_list = raw_data["files_changed"].tolist()
+        
+        hash_list.append(unique_hash)
+
+        
+        if any(".github/workflows" in str(file) for file in files_changed_list):
+            gha_list.append(True)
+            present = True
+        else:
+            gha_list.append(False)
+        
+        if present:
+            present_list.append(present)
+        else:
+            present_list.append(False)
+        
+    intermediate_dict["hash"] = hash_list
+    intermediate_dict["gha_changed"] = gha_list
+    intermediate_dict["gha_present"] = present_list
+
+    # print(len(hash_list))
+    # print(len(gha_list))
+
+    # print(intermediate_dict)
+    intermediate_data = pd.DataFrame.from_dict(intermediate_dict)
+    return intermediate_data
+
+
+def start_at_gha_dataframe(intermediate_data):
+    gha_data_start = intermediate_data.loc[intermediate_data["gha_present"] == True]
+    gha_data_start.to_csv("/home/mkapfhammer/Documents/try_faker/gha_data.csv")
+
+
+    

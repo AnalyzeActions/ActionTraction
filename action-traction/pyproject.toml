@@ -25,6 +25,7 @@ pylint = "^2.9.3"
 black = "^21.6b0"
 rich = "^10.6.0"
 giturlparse = "^0.10.0"
+ordered-set = "^4.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

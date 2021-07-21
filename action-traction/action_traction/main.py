@@ -63,3 +63,9 @@ def join_data(directory_path: str):
 def new_traverse(directory_path: str):
     new.iterate_through_directory(directory_path)
 
+
+@app.command()
+def intermediate_data(commit_csv: str):
+    intermediate_data = new.create_intermediate_dataframe(commit_csv)
+    new.start_at_gha_dataframe(intermediate_data)
+
