@@ -6,6 +6,7 @@ from action_traction import contents_metrics as file_contents
 from action_traction import complexity
 from action_traction import summarization as summary
 from action_traction import join
+from action_traction import new_traverse as new
 from typing import List
 from pathlib import Path
 import typer
@@ -57,4 +58,8 @@ def whole_repo(directory_path: str):
 @app.command()
 def join_data(directory_path: str):
     join.perform_joining(directory_path)
+
+@app.command()
+def new_traverse(directory_path: str):
+    new.iterate_through_directory(directory_path)
 
