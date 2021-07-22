@@ -4,7 +4,15 @@ import os
 import pathlib
 from ordered_set import OrderedSet
 
+from action_traction import constants
+from rich.console import Console
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TimeRemainingColumn
+from rich.progress import TimeElapsedColumn
+
 def traverse_all_commits(repository_path: str):
+    """Traverse all commits of a repository and create a dataframe with all important information."""
     hash_list = []
     date_list = []
     repository_list = []
@@ -42,38 +50,15 @@ def traverse_all_commits(repository_path: str):
     # raw_data["size_bytes"] = size_list
     raw_data["lines_added"] = lines_added_list
     raw_data["lines_removed"] = lines_removed_list
+    raw_data["source_code"] = source_code_list
 
     initial_dataframe = pd.DataFrame.from_dict(raw_data, orient="columns")
 
     return initial_dataframe
 
 
-def iterate_through_directory(root_directory: str):
-    repos_to_check = []
-    all_dataframes = []
-    final_dataframe = pd.DataFrame()
-
-    for subdir, dirs, files in os.walk(root_directory):
-        repos_to_check.append(dirs)
-    
-    for repository in repos_to_check[0]:
-        path = pathlib.Path.home() / root_directory / repository
-        initial_dataframe = traverse_all_commits(str(path))
-        
-        all_dataframes.append(initial_dataframe)
-    
-    for initial_data in all_dataframes:
-        final_dataframe = final_dataframe.append(initial_data)
-
-    
-    csv_path = root_directory + "/all_commit_data.csv"
-
-    final_dataframe.to_csv(csv_path)
-
-
-def create_intermediate_dataframe(all_commit_csv: str):
-    all_commits_dataframe = pd.read_csv(all_commit_csv)
-
+def create_intermediate_dataframe(all_commits_dataframe):
+    """Create a dataframe to indicate whether GitHub actions were changed for each commit."""
     hash_list = all_commits_dataframe["hash"].tolist()
     hash_set = OrderedSet(hash_list)
 
@@ -107,23 +92,20 @@ def create_intermediate_dataframe(all_commit_csv: str):
     intermediate_dict["gha_changed"] = gha_list
     intermediate_dict["gha_present"] = present_list
 
-    # print(len(hash_list))
-    # print(len(gha_list))
-
-    # print(intermediate_dict)
     intermediate_data = pd.DataFrame.from_dict(intermediate_dict)
-    # intermediate_data.set_index("hash", inplace=True)
+
     return intermediate_data
 
 
 def start_at_gha_dataframe(intermediate_data):
-    gha_data_start = intermediate_data.loc[intermediate_data["gha_present"] == True]
-    gha_data_start.to_csv("/home/mkapfhammer/Documents/try_faker/gha_data.csv", index=False)
-    gha_data_start.reset_index(drop=True)
-    return gha_data_start
+    """Pair down beginning dataframe to only include commits after gha were introduced."""
+    gha_data = intermediate_data.loc[intermediate_data["gha_present"] == True]
+    gha_data.reset_index(drop=True)
+    return gha_data
 
 
 def populate_smaller_dataset(gha_data, all_commit_data):
+    """Populate a dataset with all information relating to gha changed, and commits where gha was not changed."""
     count = 0
     gha_files = []
     all_files_changed = all_commit_data["files_changed"].tolist()
@@ -151,14 +133,61 @@ def populate_smaller_dataset(gha_data, all_commit_data):
             
     for dataframe in initial_data_list:
         final_data = final_data.append(dataframe)
-    
-    final_data.to_csv("/home/mkapfhammer/Documents/try_faker/secondary.csv")
-
         
     return final_data
     
 
 def join_dataframes(gha_data, final_data):
+    """Merge dataframes to add True/False of if GitHub Actions were changed."""
     merged = pd.merge(gha_data, final_data, how="right", on=["hash"])
 
-    merged.to_csv("/home/mkapfhammer/Documents/try_faker/merged.csv")
+    return merged
+
+
+def iterate_through_directory(root_directory: str):
+    """Iterate through the given directory and create all necessary datasets."""
+    repos_to_check = []
+    all_dataframes = []
+    all_commit_data = pd.DataFrame()
+
+    for subdir, dirs, files in os.walk(root_directory):
+        repos_to_check.append(dirs)
+    
+
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        generate_metrics = progress.add_task("Generating Repository Metrics", total=len(repos_to_check[0]))
+        for repository in repos_to_check[0]:
+            path = pathlib.Path.home() / root_directory / repository
+            initial_dataframe = traverse_all_commits(str(path))
+            
+            all_dataframes.append(initial_dataframe)
+            progress.update(generate_metrics, advance=1)
+    
+    for initial_data in all_dataframes:
+        all_commit_data = all_commit_data.append(initial_data)
+
+
+    intermediate_dataframe = create_intermediate_dataframe(all_commit_data)
+
+    gha_dataframe = start_at_gha_dataframe(intermediate_dataframe)
+
+
+    final_dataset = populate_smaller_dataset(gha_dataframe, all_commit_data)
+
+    merged_dataset = join_dataframes(gha_dataframe, final_dataset)
+
+    # Put all dataframes into .csv files
+    all_commit_data.to_csv(root_directory + "/all_commit_data.csv")
+    gha_dataframe.to_csv(root_directory + "/beginning_github_actions.csv")
+    merged_dataset.to_csv(root_directory + "/final_data.csv")

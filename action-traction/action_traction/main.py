@@ -23,9 +23,9 @@ def download(repositories: Path, directory: Path):
 
 
 @app.command()
-def repository_metrics(directory: str):
+def traverse(directory: str):
     """Generate a .csv file for all given repositories."""
-    traverse.iterate_through_directory(directory)
+    new.iterate_through_directory(directory)
 
 
 @app.command()
@@ -59,17 +59,3 @@ def whole_repo(directory_path: str):
 @app.command()
 def join_data(directory_path: str):
     join.perform_joining(directory_path)
-
-@app.command()
-def new_traverse(directory_path: str):
-    new.iterate_through_directory(directory_path)
-
-
-@app.command()
-def intermediate_data(commit_csv: str):
-    intermediate_data = new.create_intermediate_dataframe(commit_csv)
-    gha_data = new.start_at_gha_dataframe(intermediate_data)
-    all_commit_data = pd.read_csv("/home/mkapfhammer/Documents/try_faker/all_commit_data.csv")
-    final_data = new.populate_smaller_dataset(gha_data, all_commit_data)
-    # print(type(final_data))
-    new.join_dataframes(gha_data, final_data)
