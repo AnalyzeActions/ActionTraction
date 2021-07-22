@@ -28,7 +28,19 @@ def traverse_all_commits(repository_path: str):
 
     for commit in Repository(repository_path).traverse_commits():
         for modification in commit.modified_files:
-            complete_file = repository_path + "/" + modification.filename
+
+            p = pathlib.Path(repository_path)
+            p.mkdir(parents=True, exist_ok=True)
+            fn = "size.yml"
+            file_path = p / fn
+            with file_path.open("w", encoding = "utf-8") as f:
+                if modification.source_code is not None:
+                    f.write(modification.source_code)
+                else:
+                    f.write("")
+            
+            complete_file = repository_path + "/size.yml"
+            # print(complete_file)
 
             hash_list.append(commit.hash)
             date_list.append(commit.committer_date)
@@ -36,7 +48,7 @@ def traverse_all_commits(repository_path: str):
             author_list.append(commit.author.name)
             committer_list.append(commit.committer.name)
             files_changed_list.append(modification.new_path)
-            # size_list.append(os.stat(complete_file).st_size)
+            size_list.append(os.stat(complete_file).st_size)
             lines_added_list.append(commit.insertions)
             lines_removed_list.append(commit.deletions)
             source_code_list.append(modification.source_code)
@@ -47,7 +59,7 @@ def traverse_all_commits(repository_path: str):
     raw_data["author"] = author_list
     raw_data["committer"] = committer_list
     raw_data["files_changed"] = files_changed_list
-    # raw_data["size_bytes"] = size_list
+    raw_data["size_bytes"] = size_list
     raw_data["lines_added"] = lines_added_list
     raw_data["lines_removed"] = lines_removed_list
     raw_data["source_code"] = source_code_list
@@ -181,7 +193,6 @@ def iterate_through_directory(root_directory: str):
     intermediate_dataframe = create_intermediate_dataframe(all_commit_data)
 
     gha_dataframe = start_at_gha_dataframe(intermediate_dataframe)
-
 
     final_dataset = populate_smaller_dataset(gha_dataframe, all_commit_data)
 
