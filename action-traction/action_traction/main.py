@@ -5,7 +5,6 @@ from action_traction import basic_metrics as basic
 from action_traction import contents_metrics as file_contents
 from action_traction import complexity
 from action_traction import summarization as summary
-from action_traction import join
 from action_traction import new_traverse as new
 from typing import List
 from pathlib import Path
