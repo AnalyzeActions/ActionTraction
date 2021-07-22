@@ -154,4 +154,11 @@ def populate_smaller_dataset(gha_data, all_commit_data):
     
     final_data.to_csv("/home/mkapfhammer/Documents/try_faker/secondary.csv")
 
+        
+    return final_data
     
+
+def join_dataframes(gha_data, final_data):
+    merged = pd.merge(gha_data, final_data, how="right", on=["hash"])
+
+    merged.to_csv("/home/mkapfhammer/Documents/try_faker/merged.csv")

@@ -69,6 +69,7 @@ def new_traverse(directory_path: str):
 def intermediate_data(commit_csv: str):
     intermediate_data = new.create_intermediate_dataframe(commit_csv)
     gha_data = new.start_at_gha_dataframe(intermediate_data)
-
     all_commit_data = pd.read_csv("/home/mkapfhammer/Documents/try_faker/all_commit_data.csv")
-    #new.populate_smaller_dataset(gha_data, all_commit_data)
+    final_data = new.populate_smaller_dataset(gha_data, all_commit_data)
+    # print(type(final_data))
+    new.join_dataframes(gha_data, final_data)
