@@ -10,6 +10,7 @@ from action_traction import new_traverse as new
 from typing import List
 from pathlib import Path
 import typer
+import pandas as pd
 
 app = typer.Typer()
 
@@ -67,5 +68,7 @@ def new_traverse(directory_path: str):
 @app.command()
 def intermediate_data(commit_csv: str):
     intermediate_data = new.create_intermediate_dataframe(commit_csv)
-    new.start_at_gha_dataframe(intermediate_data)
+    gha_data = new.start_at_gha_dataframe(intermediate_data)
 
+    all_commit_data = pd.read_csv("/home/mkapfhammer/Documents/try_faker/all_commit_data.csv")
+    #new.populate_smaller_dataset(gha_data, all_commit_data)

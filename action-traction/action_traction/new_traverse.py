@@ -112,12 +112,46 @@ def create_intermediate_dataframe(all_commit_csv: str):
 
     # print(intermediate_dict)
     intermediate_data = pd.DataFrame.from_dict(intermediate_dict)
+    # intermediate_data.set_index("hash", inplace=True)
     return intermediate_data
 
 
 def start_at_gha_dataframe(intermediate_data):
     gha_data_start = intermediate_data.loc[intermediate_data["gha_present"] == True]
-    gha_data_start.to_csv("/home/mkapfhammer/Documents/try_faker/gha_data.csv")
+    gha_data_start.to_csv("/home/mkapfhammer/Documents/try_faker/gha_data.csv", index=False)
+    gha_data_start.reset_index(drop=True)
+    return gha_data_start
 
+
+def populate_smaller_dataset(gha_data, all_commit_data):
+    count = 0
+    gha_files = []
+    all_files_changed = all_commit_data["files_changed"].tolist()
+    all_files_set = OrderedSet(all_files_changed)
+    initial_data_list = []
+    hash_list = []
+    secondary_data = pd.DataFrame()
+    final_data = pd.DataFrame()
+
+    for index, row in gha_data.iterrows():
+        changed = row["gha_changed"]
+        if changed == True:
+            unique_hash = row["hash"]
+            secondary_data = all_commit_data.loc[all_commit_data["hash"] == unique_hash]
+            initial_data_list.append(secondary_data)
+        elif changed == False:
+            correct_hash = row["hash"]
+            raw_data = initial_data_list[len(initial_data_list)-1]
+            changed_data = raw_data.copy(deep=True)
+            
+            changed_data["hash"] = correct_hash
+
+            # raw_data["hash"] = hash_list
+            initial_data_list.append(changed_data)
+            
+    for dataframe in initial_data_list:
+        final_data = final_data.append(dataframe)
+    
+    final_data.to_csv("/home/mkapfhammer/Documents/try_faker/secondary.csv")
 
     
