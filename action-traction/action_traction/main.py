@@ -6,6 +6,7 @@ from action_traction import contents_metrics as file_contents
 from action_traction import complexity
 from action_traction import summarization as summary
 from action_traction import new_traverse as new
+from action_traction import new_complexity
 from typing import List
 from pathlib import Path
 import typer
@@ -34,9 +35,9 @@ def determine_diffs(directory: str):
 
 
 @app.command()
-def determine_complexity(directory_path: str):
+def complexity(directory_path: str):
     """Generate a quality score for GitHub Actions files."""
-    complexity.iterate_through_directory(directory_path)
+    new_complexity.iterate_through_directory(directory_path)
 
 
 @app.command()
@@ -54,3 +55,7 @@ def contributors(directory_path: str):
 def whole_repo(directory_path: str):
     """Determine metrics for every commit in a GitHub repository."""
     summary.entire_repo_metrics(directory_path)
+
+@app.command()
+def complexity_json(directory_path: str):
+    new_complexity.cyclomatic_complexity_json(directory_path)
