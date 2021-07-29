@@ -58,7 +58,7 @@ def traverse_all_commits(repository_path: str):
     raw_data["repo"] = repository_list
     raw_data["author"] = author_list
     raw_data["committer"] = committer_list
-    raw_data["files_changed"] = files_changed_list
+    raw_data["file_changed"] = files_changed_list
     raw_data["size_bytes"] = size_list
     raw_data["lines_added"] = lines_added_list
     raw_data["lines_removed"] = lines_removed_list
@@ -84,7 +84,7 @@ def create_intermediate_dataframe(all_commits_dataframe):
 
     for unique_hash in hash_set:
         raw_data = all_commits_dataframe.loc[all_commits_dataframe["hash"] == unique_hash]
-        files_changed_list = raw_data["files_changed"].tolist()
+        files_changed_list = raw_data["file_changed"].tolist()
         
         hash_list.append(unique_hash)
 
@@ -120,7 +120,7 @@ def populate_smaller_dataset(gha_data, all_commit_data):
     """Populate a dataset with all information relating to gha changed, and commits where gha was not changed."""
     count = 0
     gha_files = []
-    all_files_changed = all_commit_data["files_changed"].tolist()
+    all_files_changed = all_commit_data["file_changed"].tolist()
     all_files_set = OrderedSet(all_files_changed)
     initial_data_list = []
     hash_list = []
