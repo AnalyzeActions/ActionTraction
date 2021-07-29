@@ -5,7 +5,7 @@ name: main
 # Focuses on the master branch only
 on:
   push:
-    branches: [ master ]
+    branches: [ master, development ]
   pull_request:
     branches: [ master ]
 
