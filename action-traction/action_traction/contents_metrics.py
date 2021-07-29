@@ -70,7 +70,7 @@ def generate_abstract_syntax_trees(source_code_dataframe):
     for source_code in source_code_list:
         if source_code is not None:
             try:
-                parsed_yaml = yaml.safe_load(source_code)
+                parsed_yaml = yaml.safe_load(str(source_code))
                 yaml_list.append(parsed_yaml)
             except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
                 yaml_list.append("Cannot Parse")
@@ -84,7 +84,7 @@ def generate_abstract_syntax_trees(source_code_dataframe):
 
 def determine_repositories(initial_data):
     """Create a set of the unique repositories in a dataframe."""
-    repository_list = initial_data["Repository"].tolist()
+    repository_list = initial_data["repo"].tolist()
     repository_set = set(repository_list)
     return repository_set
 
@@ -94,7 +94,7 @@ def determine_files_per_repo(initial_data, repository_set):
     repo_file_dict = {}
     for repository in repository_set:
         new_data = initial_data.loc[initial_data["repo"] == repository]
-        file_list = new_data["file"].tolist()
+        file_list = new_data["file_changed"].tolist()
         file_set = set(file_list)
         repo_file_dict[repository] = file_set
     return repo_file_dict
@@ -108,13 +108,13 @@ def determine_steps_run(yaml_data, repo_file_dict):
     steps_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["file"] == file]
+            new_data = yaml_data.loc[yaml_data["file_changed"] == file]
             yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 steps_run = nested_lookup("uses", parse_tree)
                 steps_run_dict["repo"] = [repo]
-                steps_run_dict["file"] = [file]
+                steps_run_dict["file_changed"] = [file]
                 steps_run_dict["defined_action"] = [steps_run]
                 steps_run_dict["amount_actions"] = [len(steps_run)]
 
@@ -135,13 +135,13 @@ def determine_runs(yaml_data, repo_file_dict):
     runs_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["file"] == file]
+            new_data = yaml_data.loc[yaml_data["file_changed"] == file]
             yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_command = nested_lookup("run", parse_tree)
                 runs_dict["repo"] = [repo]
-                runs_dict["file"] = [file]
+                runs_dict["file_changed"] = [file]
                 runs_dict["specified_command"] = [defined_command]
                 runs_dict["amount_commands"] = [len(defined_command)]
 
@@ -162,13 +162,13 @@ def determine_operating_systems(yaml_data, repo_file_dict):
     operating_systems_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["file"] == file]
+            new_data = yaml_data.loc[yaml_data["file_changed"] == file]
             yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_os = nested_lookup("os", parse_tree)
                 operating_systems_dict["repo"] = [repo]
-                operating_systems_dict["file"] = [file]
+                operating_systems_dict["file_changed"] = [file]
                 operating_systems_dict["operating_systems"] = [defined_os]
                 operating_systems_dict["amount_os"] = [
                     len(defined_os)
@@ -191,13 +191,13 @@ def determine_environments(yaml_data, repo_file_dict):
     environments_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["file"] == file]
+            new_data = yaml_data.loc[yaml_data["file_changed"] == file]
             yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_environments = nested_lookup("env", parse_tree)
                 environments_dict["repo"] = [repo]
-                environments_dict["file"] = [file]
+                environments_dict["file_changed"] = [file]
                 environments_dict["environments"] = [defined_environments]
                 environments_dict["amount_envs"] = [
                     len(defined_environments)
@@ -221,14 +221,14 @@ def determine_languages(yaml_data, repo_file_dict):
     languages_dataframe = pd.DataFrame()
     for repo, file_list in repo_file_dict.items():
         for file in file_list:
-            new_data = yaml_data.loc[yaml_data["file"] == file]
+            new_data = yaml_data.loc[yaml_data["file_changed"] == file]
             yaml_list = new_data["parse_status"].tolist()
 
             for parse_tree in yaml_list:
                 defined_languages = nested_lookup(regex, parse_tree)
                 print(defined_languages)
                 languages_dict["repo"] = [repo]
-                languages_dict["file"] = [file]
+                languages_dict["file_changed"] = [file]
                 languages_dict["languages"] = [defined_languages]
                 languages_dict["amount_languages"] = [len(defined_languages)]
 
@@ -292,10 +292,14 @@ def contents_over_time(directory):
     env_list = []
     env_amount_list = []
 
+    final_data = pd.read_csv((directory + "/final_data.csv"))
+
     source_code_data = iterate_through_directory(directory)
-    repo_set = determine_repositories(source_code_data)
-    repo_file_dict = determine_files_per_repo(source_code_data, repo_set)
-    yaml_data = generate_abstract_syntax_trees(source_code_data)
+    repo_set = determine_repositories(final_data)
+    repo_file_dict = determine_files_per_repo(final_data, repo_set)
+
+
+    yaml_data = generate_abstract_syntax_trees(final_data)
 
     steps_dataframe = determine_steps_run(yaml_data, repo_file_dict)
     commands_dataframe = determine_runs(yaml_data, repo_file_dict)
