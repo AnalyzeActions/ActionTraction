@@ -4,6 +4,7 @@ from typing import List
 import statistics
 import pandas as pd
 import datetime
+from ordered_set import OrderedSet
 
 
 def determine_repositories(initial_data):
@@ -11,7 +12,7 @@ def determine_repositories(initial_data):
     # Create a list of all repositories
     repository_list = initial_data["repo"].tolist()
     # Find each unique repository name return the set
-    repository_set = set(repository_list)
+    repository_set = OrderedSet(repository_list)
 
     return repository_set
 
@@ -25,9 +26,9 @@ def determine_files_per_repo(initial_data, repository_set):
         # Create a new dataset for each unique repository
         new_data = initial_data.loc[initial_data["repo"] == repository]
         # Make a list of each of the files for a unique repository
-        file_list = new_data["file"].tolist()
+        file_list = new_data["file_changed"].tolist()
         # Determine each unique GitHub Actions file associated with a repository
-        file_set = set(file_list)
+        file_set = OrderedSet(file_list)
         # Create a dictionary with repository as key and corresponding files as value
         repo_file_dict[repository] = file_set
 
@@ -65,7 +66,7 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
         # Iterate through list of GitHub Actions files for a certain repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["file"] == file]
+            new_data = initial_data.loc[initial_data["file_changed"] == file]
             # Create a list of commit dates from intial dataset
             date_list = new_data["date"].tolist()
 
@@ -85,7 +86,7 @@ def calculate_file_lifetime(initial_data, repo_file_dict):
 
             # Create a dictionary with all necessary information relating to lifetime
             lifetime_dictionary["repo"] = [repo]
-            lifetime_dictionary["file"] = [file]
+            lifetime_dictionary["file_changed"] = [file]
             lifetime_dictionary["repo_lifetime"] = [repository_lifetime]
             lifetime_dictionary["file_lifetime"] = [file_lifetime]
             lifetime_dictionary["file_existence"] = percentage_of_lifetime
@@ -117,7 +118,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each file in a repo
-            new_data = initial_data.loc[initial_data["file"] == file]
+            new_data = initial_data.loc[initial_data["file_changed"] == file]
             size_list = new_data["size_bytes"].tolist()
 
             # Generate summary statistics relating to file size
@@ -130,7 +131,7 @@ def calculate_size_metrics(initial_data, repo_file_dict):
 
             # Create dictionary for each repository with size summary stats
             size_dictionary["repo"] = [repo]
-            size_dictionary["file"] = [file]
+            size_dictionary["file_changed"] = [file]
             size_dictionary["min"] = [minimum]
             size_dictionary["max"] = [maximum]
             size_dictionary["mean"] = [mean]
@@ -160,7 +161,7 @@ def calculate_author_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["file"] == file]
+            new_data = initial_data.loc[initial_data["file_changed"] == file]
             # Create a list of authors for commits of each Action file
             author_list = new_data["author"].tolist()
             # Create a list of unique authors related to each Action file
@@ -181,7 +182,7 @@ def calculate_author_metrics(initial_data, repo_file_dict):
 
                 # Create dictionary with author summary stats
                 author_dictionary["repo"] = [repo]
-                author_dictionary["file"] = [file]
+                author_dictionary["file_changed"] = [file]
                 author_dictionary["author"] = [unique_author]
                 author_dictionary[
                     "author_commits"
@@ -214,7 +215,7 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["file"] == file]
+            new_data = initial_data.loc[initial_data["file_changed"] == file]
             # Create a list of committers for each file
             committer_list = new_data["committer"].tolist()
             # Create a set of each unqiue committer associated with a Actions file
@@ -235,7 +236,7 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
 
                 # Create a dictionary for committer summary stats
                 committer_dictionary["repo"] = [repo]
-                committer_dictionary["file"] = [file]
+                committer_dictionary["file_changed"] = [file]
                 committer_dictionary["committer"] = [unique_committer]
                 committer_dictionary[
                     "committer_commits"
@@ -268,7 +269,7 @@ def calculate_lines_added_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["file"] == file]
+            new_data = initial_data.loc[initial_data["file_changed"] == file]
             # Create a list of lines added metrics for each file
             lines_added_list = new_data["lines_added"].tolist()
 
@@ -282,7 +283,7 @@ def calculate_lines_added_metrics(initial_data, repo_file_dict):
 
             # Create dictionary for each repository with lines added summary stats
             added_dictionary["repo"] = [repo]
-            added_dictionary["file"] = [file]
+            added_dictionary["file_changed"] = [file]
             added_dictionary["min"] = [minimum]
             added_dictionary["max"] = [maximum]
             added_dictionary["mean"] = [mean]
@@ -312,7 +313,7 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["file"] == file]
+            new_data = initial_data.loc[initial_data["file_changed"] == file]
             # Create a list of lines removed metrics for each file
             lines_removed_list = new_data["lines_removed"].tolist()
 
@@ -326,7 +327,7 @@ def calculate_lines_removed_metrics(initial_data, repo_file_dict):
 
             # Create dictionary for each repository with lines removed summary stats
             removed_dictionary["repo"] = [repo]
-            removed_dictionary["file"] = [file]
+            removed_dictionary["file_changed"] = [file]
             removed_dictionary["min"] = [minimum]
             removed_dictionary["max"] = [maximum]
             removed_dictionary["mean"] = [mean]
@@ -356,7 +357,7 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
         # Iterate through each file in a unqiue repository
         for file in file_list:
             # Create a new dataset for each unique file
-            new_data = initial_data.loc[initial_data["file"] == file]
+            new_data = initial_data.loc[initial_data["file_changed"] == file]
             # Create list of commit messages relating to each file
             commit_message_list = new_data["commit_message"].tolist()
 
@@ -377,7 +378,7 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
 
             # Create dictionary of summary statistics relating to size of commit message
             commit_message_dictionary["repo"] = [repo]
-            commit_message_dictionary["file"] = [file]
+            commit_message_dictionary["file_changed"] = [file]
             commit_message_dictionary["message_size"] = [size_message_list]
             commit_message_dictionary["min"] = [minimum]
             commit_message_dictionary["max"] = [maximum]
@@ -399,8 +400,8 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
 
 def determine_contributors(directory: str):
     """Determine who has contributed to GitHub Actions files."""
-    csv_path = directory + "/minedRepos.csv"
-    entire_data_path = directory + "/entireRepo.csv"
+    csv_path = directory + "/final_data.csv"
+    entire_data_path = directory + "/all_commit_data.csv"
     initial_data = pd.read_csv(csv_path)
     entire_repo_data = pd.read_csv(entire_data_path)
     repository_set = determine_repositories(initial_data)
@@ -411,7 +412,7 @@ def determine_contributors(directory: str):
     author_results.to_csv(directory + "/authors.csv")
     committer_results.to_csv(directory + "/committers.csv")
 
-    contributors_results = contributors_enitre_repo(directory, entire_repo_data, repository_set)
+    contributors_results = contributors_enitre_repo(entire_repo_data, repository_set)
 
     complete_dataframe = author_results
     committers = committer_results["committer"].tolist()
