@@ -185,9 +185,9 @@ def calculate_author_metrics(initial_data, repo_file_dict):
                 author_dictionary["file_changed"] = [file]
                 author_dictionary["author"] = [unique_author]
                 author_dictionary[
-                    "author_commits"
+                    "author_corresponding_commits"
                 ] = unique_author_contribution
-                author_dictionary["author_contribution"] = [
+                author_dictionary["author_percentage_contribution"] = [
                     author_percentage_contribution
                 ]
 
@@ -239,9 +239,9 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
                 committer_dictionary["file_changed"] = [file]
                 committer_dictionary["committer"] = [unique_committer]
                 committer_dictionary[
-                    "committer_commits"
+                    "committer_corresponding_commits"
                 ] = unique_committer_contribution
-                committer_dictionary["committer_contribution"] = [
+                committer_dictionary["committer_percentage_contribution"] = [
                     committer_percentage_contribution
                 ]
 
@@ -256,6 +256,31 @@ def calculate_committer_metrics(initial_data, repo_file_dict):
         committer_dataframe = committer_dataframe.append(result)
 
     return committer_dataframe
+
+
+def github_actions_contributors(root_directory: str):
+    actions_contributors = pd.DataFrame()
+
+    final_data = pd.read_csv(root_directory + "/final_data.csv")
+
+    repository_set = determine_repositories(final_data)
+    repo_file_dict = determine_files_per_repo(final_data, repository_set)
+
+    author_dataframe = calculate_author_metrics(final_data, repo_file_dict)
+    committer_dataframe = calculate_committer_metrics(final_data, repo_file_dict)
+
+    actions_contributors = author_dataframe
+
+    committer_name = committer_dataframe["committer"].tolist()
+    committer_commits = committer_dataframe["committer_corresponding_commits"].tolist()
+    committer_percentage = committer_dataframe["committer_percentage_contribution"].tolist()
+
+    actions_contributors["committer"] = committer_name
+    actions_contributors["committer_corresponding_commits"] = committer_commits
+    actions_contributors["committer_percentage_contribution"] = committer_percentage
+
+    path = root_directory + "/contributors.csv"
+    actions_contributors.to_csv(path)
 
 
 def calculate_lines_added_metrics(initial_data, repo_file_dict):
@@ -396,6 +421,9 @@ def calculate_commit_message_metrics(initial_data, repo_file_dict):
         commit_message_dataframe = commit_message_dataframe.append(result)
 
     return commit_message_dataframe
+
+
+
 
 
 def determine_contributors(directory: str):

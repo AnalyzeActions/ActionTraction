@@ -49,7 +49,7 @@ def contents_analysis(directory_path: str):
 @app.command()
 def contributors(directory_path: str):
     """Determine contributors for a repository and GitHub Actions.""" 
-    summary.determine_contributors(directory_path)
+    summary.github_actions_contributors(directory_path)
 
 @app.command()
 def whole_repo(directory_path: str):
