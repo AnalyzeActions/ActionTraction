@@ -267,7 +267,9 @@ def github_actions_contributors(root_directory: str):
     repo_file_dict = determine_files_per_repo(final_data, repository_set)
 
     author_dataframe = calculate_author_metrics(final_data, repo_file_dict)
+    print(author_dataframe)
     committer_dataframe = calculate_committer_metrics(final_data, repo_file_dict)
+    print(committer_dataframe)
 
     actions_contributors = author_dataframe
 
