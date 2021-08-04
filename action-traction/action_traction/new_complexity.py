@@ -162,11 +162,21 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
 def cyclomatic_complexity_json(directory: str):
     complexity_key = {}
 
-    complexity_key["dispatch"] = 1
+    complexity_key["on"] = "len"
+    complexity_key["types"] = "len"
+    complexity_key["paths"] = "len"
+    complexity_key["paths-ignore"] = "len"
+    complexity_key["workflow_dispatch"] = 1
     complexity_key["schedule"] = 1
+    complexity_key["needs"] = "len"
+    complexity_key["runs-on"] = "len"
+    complexity_key["run"] = 1
     complexity_key["if"] = 1
+    complexity_key["steps"] = 1
     complexity_key["and"] = 1
     complexity_key["or"] = 1
+    complexity_key["timeout-minutes"] = 1
+    complexity_key["container"] = 1
 
     path = directory + "/complexity.json"
     with open(path, "w") as outfile: 
