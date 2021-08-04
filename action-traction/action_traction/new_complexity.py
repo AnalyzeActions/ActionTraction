@@ -65,14 +65,14 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
     for tree in abstract_trees_list:
         # Find existing GitHub Actions used in .yml file
         uses_operator_list = nested_lookup("uses", tree)
-        print("Found " + str(len(uses_operator_list)) + " unique GitHub Actions used.")
+        # print("Found " + str(len(uses_operator_list)) + " unique GitHub Actions used.")
         # Find user defined commands used in .yml file
         runs_operator_list = nested_lookup("run", tree)
-        print(
-            "Found "
-            + str(len(runs_operator_list))
-            + " unique developer-specified commands used."
-        )
+        # print(
+        #     "Found "
+        #     + str(len(runs_operator_list))
+        #     + " unique developer-specified commands used."
+        # )
 
         # Calculate the total amount of operators
         total_operators = len(uses_operator_list) + len(runs_operator_list)
@@ -81,20 +81,20 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
         if len(uses_operator_list) != 0:
             # print("+1 for each existing action used")
             distinct_operators = distinct_operators + 1
-            print("Found distinct operator 'uses'")
+            # print("Found distinct operator 'uses'")
         if len(runs_operator_list) != 0:
             # print("+1 for each defined command used")
             distinct_operators = distinct_operators + 1
-            print("Found distinct operator 'runs'")
+            # print("Found distinct operator 'runs'")
 
         # TODO: Are "with" and "env" defined properly?
         # Find developer-defined commands used in .yml file
         name_operand_list = nested_lookup("name", tree)
-        print("Found " + str(len(name_operand_list)) + " unique 'name'.")
+        # print("Found " + str(len(name_operand_list)) + " unique 'name'.")
         with_operand_list = nested_lookup("with", tree)
-        print("Found " + str(len(with_operand_list)) + " unique 'with'.")
+        # print("Found " + str(len(with_operand_list)) + " unique 'with'.")
         env_operand_list = nested_lookup("env", tree)
-        print("Found " + str(len(name_operand_list)) + " unique 'env'")
+        # print("Found " + str(len(name_operand_list)) + " unique 'env'")
 
         total_operands = (
             len(name_operand_list) + len(with_operand_list) + len(env_operand_list)
@@ -102,13 +102,13 @@ def determine_halstead_metrics(source_code_dataframe, yaml_dataframe):
 
         if len(name_operand_list) != 0:
             distinct_operands = distinct_operands + 1
-            print("Found distinct operand 'name' ")
+            # print("Found distinct operand 'name' ")
         if len(with_operand_list) != 0:
             distinct_operands = distinct_operands + 1
-            print("Found distinct operand 'with'")
+            # print("Found distinct operand 'with'")
         if len(env_operand_list) != 0:
             distinct_operands = distinct_operands + 1
-            print("Found distinct operand 'env'")
+            # print("Found distinct operand 'env'")
 
         # Calculate Halstead metrics and add to corresponding lists
         if (
@@ -179,6 +179,7 @@ def determine_cyclomatic_complexity(source_code_dataframe, yaml_dataframe, direc
     complexity_dict = {}
     complexity = 0
     value_complexity = 0
+    total_complexity = 0
     path = directory_path + "/complexity.json"
     with open(path) as json_file:
         complexity_key = json.load(json_file)
@@ -193,13 +194,17 @@ def determine_cyclomatic_complexity(source_code_dataframe, yaml_dataframe, direc
     hash_list = source_code_dataframe["hash"].tolist()
 
     for tree in abstract_trees_list:
+        total_complexity = 0
         for key, value in complexity_key.items():
+            # print(key)
             found = nested_lookup(key, tree)
+            # print(len(found))
             value_complexity = (len(found) * value)
-        complexity = complexity + value_complexity
-        total_complexity_list.append(complexity)
+            total_complexity = value_complexity + total_complexity
+        total_complexity_list.append(total_complexity)
     
     # Create a dictionary with cyclomatic complexity
+    print(len(total_complexity_list))
     complexity_dict["hash"] = hash_list
     complexity_dict["date"] = date_list
     complexity_dict["file_changed"] = file_list
