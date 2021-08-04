@@ -172,6 +172,11 @@ def cyclomatic_complexity_json(directory: str):
     with open(path, "w") as outfile: 
         json.dump(complexity_key, outfile)
     
+def complexity_helper(yaml_dataframe, lookup_dictionary):
+    abstract_trees_list = yaml_dataframe["parse_status"].tolist()
+    for tree in abstract_trees_list:
+        found = nested_lookup("on", tree)
+        print(found)
 
 def determine_cyclomatic_complexity(source_code_dataframe, yaml_dataframe, directory_path):
     total_complexity_list = []
@@ -204,7 +209,6 @@ def determine_cyclomatic_complexity(source_code_dataframe, yaml_dataframe, direc
         total_complexity_list.append(total_complexity)
     
     # Create a dictionary with cyclomatic complexity
-    print(len(total_complexity_list))
     complexity_dict["hash"] = hash_list
     complexity_dict["date"] = date_list
     complexity_dict["file_changed"] = file_list
