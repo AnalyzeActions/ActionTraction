@@ -7,6 +7,7 @@ from action_traction import complexity
 from action_traction import summarization as summary
 from action_traction import new_traverse as new
 from action_traction import new_complexity
+from action_traction import join
 from typing import List
 from pathlib import Path
 import typer
@@ -59,3 +60,7 @@ def whole_repo(directory_path: str):
 @app.command()
 def complexity_json(directory_path: str):
     new_complexity.cyclomatic_complexity_json(directory_path)
+
+@app.command()
+def final_join(path_one, path_two, key):
+    join.join_datasets(path_one, path_two, key)
