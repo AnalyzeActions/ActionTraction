@@ -211,11 +211,12 @@ def determine_cyclomatic_complexity(source_code_dataframe, yaml_dataframe, direc
     for tree in abstract_trees_list:
         total_complexity = 0
         for key, value in complexity_key.items():
-            # print(key)
-            found = nested_lookup(key, tree)
-            # print(len(found))
-            value_complexity = (len(found) * value)
-            total_complexity = value_complexity + total_complexity
+            if type(value) == int:
+                # print(key)
+                found = nested_lookup(key, tree)
+                # print(len(found))
+                value_complexity = (len(found) * value)
+                total_complexity = value_complexity + total_complexity
         total_complexity_list.append(total_complexity)
     
     # Create a dictionary with cyclomatic complexity
