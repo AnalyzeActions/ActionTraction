@@ -12,19 +12,13 @@ from typing import List
 from pathlib import Path
 import typer
 import pandas as pd
-import individual_analysis_cli as individual
 
-from rich.console import Console
-# import complete_analysis_cli as complete
-
-
-console = Console()
 app = typer.Typer()
+
 
 @app.command()
 def download(repositories: Path, directory: Path):
     """Import GitHub repository credentials."""
-    console.print("Downloading Repositories", style="bold red")
     path_list = down.generate_save_path(repositories, directory)
     number_repos = down.download_https(repositories, path_list)
 
@@ -37,7 +31,6 @@ def traverse_repos(directory: str):
 
 @app.command()
 def analyze(directory_path: str):
-    """Analyze all repositories."""
     final_dataset = basic.combine_dataframes(directory_path)
     new_complexity.iterate_through_directory(directory_path)
     dataset = file_contents.contents_over_time(directory_path)
@@ -46,9 +39,4 @@ def analyze(directory_path: str):
 
 @app.command()
 def join(path_one, path_two, key):
-    """Join data based on specification."""
     join.join_datasets(path_one, path_two, key)
- 
-app.add_typer(individual.app, name="individual-analysis")
-
-# app.add_typer(complete.app, name="complete-analysis")
